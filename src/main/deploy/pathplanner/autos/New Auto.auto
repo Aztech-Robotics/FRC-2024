@@ -1,0 +1,43 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 1.6,
+      "y": 5.5
+    },
+    "rotation": 0
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "SPK_TO_NOTE_RIGHT"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "NOTE_RIGHT_TO_SPK"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "SPK_TO_NOTE_CENTER"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "NOTE_CENTER_TO_SPK"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": false
+}
