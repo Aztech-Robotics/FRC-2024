@@ -16,7 +16,6 @@ public class FollowPath extends Command {
 
   @Override
   public void initialize() {
-
     if (mDrive.isReadyForAuto()) {
       mDrive.setTrajectory(path); 
     }

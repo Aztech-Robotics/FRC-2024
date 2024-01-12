@@ -25,6 +25,7 @@ import frc.lib.swerve.SwerveModule;
 import frc.lib.vision.LimelightHelpers;
 import frc.robot.Constants;
 import frc.robot.ControlBoard;
+import frc.robot.Robot;
 import frc.robot.Telemetry; 
 import frc.robot.Constants.SwerveModules;
 import frc.robot.Constants.Drive.DriveControlMode;
@@ -121,7 +122,7 @@ public class Drive extends SubsystemBase {
     mPeriodicIO.meas_chassis_speeds = swerveKinematics.toChassisSpeeds(mPeriodicIO.meas_module_states); 
     mPeriodicIO.robot_pose = mOdometry.update(mPeriodicIO.yawAngle, mPeriodicIO.meas_module_states); 
     if (getTagId() != -1) {
-      mOdometry.addVisionMeasurement(LimelightHelpers.getBotPose2d("limelight"), 
+      mOdometry.addVisionMeasurement(Robot.flipAlliance() ? LimelightHelpers.getBotPose2d_wpiRed("limelight") : LimelightHelpers.getBotPose2d_wpiBlue("limelight"), 
       Timer.getFPGATimestamp() - (LimelightHelpers.getLatency_Pipeline("limelight")/1000.0) - (LimelightHelpers.getLatency_Capture("limelight")/1000.0));
     }
   }

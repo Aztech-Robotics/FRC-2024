@@ -10,32 +10,7 @@
   "command": {
     "type": "sequential",
     "data": {
-      "commands": [
-        {
-          "type": "path",
-          "data": {
-            "pathName": "SPK_TO_NOTE_RIGHT"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "NOTE_RIGHT_TO_SPK"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "SPK_TO_NOTE_CENTER"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "NOTE_CENTER_TO_SPK"
-          }
-        }
-      ]
+      "commands": []
     }
   },
   "folder": null,

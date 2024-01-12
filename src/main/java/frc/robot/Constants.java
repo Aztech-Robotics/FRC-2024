@@ -8,6 +8,12 @@ import frc.lib.swerve.SwerveModule.SwerveModuleConstants;
 public final class Constants {
 
     public static double kLooperDt = 0.02; 
+
+    public static class Field {
+        public static final double length = 16.54; 
+        public static final double width = 8.21; 
+    }
+
     public static class Drive {
         public static final int id_pigeon = 13;
         public static final double track_width = 0.57; 
