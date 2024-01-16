@@ -1,26 +1,29 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.IAuto;
+import frc.robot.commands.MotorJoystick;
 import frc.robot.subsystems.Drive;
+import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Drive.DriveControlState;
 
 public class Robot extends TimedRobot {
   private Drive mDrive; 
+  private Shooter mShooter; 
   private Command mAutonomousCommand;
 
   public static boolean flipAlliance (){
-    return DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red;
+    return true; 
   }
 
   @Override
   public void robotInit() {
     mDrive = Drive.getInstance(); 
+    mShooter = Shooter.getInstance(); 
+    mShooter.setDefaultCommand(new MotorJoystick());
     Telemetry.displayAutos();
   }
 
@@ -35,7 +38,9 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void disabledPeriodic() {}
+  public void disabledPeriodic() {
+    
+  }
 
   @Override
   public void autonomousInit() {
@@ -63,7 +68,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     if (ControlBoard.driver.getAButtonPressed()) {
-      mDrive.setYawAngle(0); 
+      mDrive.setYawAngle(180); 
     }
     if (ControlBoard.driver.getBButtonPressed()) {
       mDrive.setDriveControlState(DriveControlState.ForceOrient);

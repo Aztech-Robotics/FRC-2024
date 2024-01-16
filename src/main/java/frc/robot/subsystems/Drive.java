@@ -2,8 +2,6 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.Pigeon2;
-import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.path.PathPlannerTrajectory;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
@@ -13,6 +11,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
@@ -64,7 +63,8 @@ public class Drive extends SubsystemBase {
       new SwerveModule(SwerveModules.MOD2, 2),
       new SwerveModule(SwerveModules.MOD3, 3)
     };
-    pigeon.reset();
+    pigeon.reset(); 
+    pigeon.setYaw(180);
     mOdometry = new SwerveDrivePoseEstimator(
       swerveKinematics, getModulesStates(), new Pose2d(), 
       new Matrix<>(Nat.N3(), Nat.N1()), 
@@ -301,9 +301,8 @@ public class Drive extends SubsystemBase {
     return odometryReset; 
   }
 
-  public void setTrajectory (PathPlannerPath path) {
-    PathPlannerTrajectory trajectory = path.getTrajectory(mPeriodicIO.meas_chassis_speeds, mPeriodicIO.yawAngle); 
-    mMotionPlanner.setTrajectory(trajectory, getPose(), mPeriodicIO.meas_chassis_speeds); 
+  public void setTrajectory (Trajectory trajectory, Rotation2d targetRotation) {
+    mMotionPlanner.setTrajectory(trajectory, getPose(), mPeriodicIO.meas_chassis_speeds, targetRotation); 
     mControlState = DriveControlState.PathFollowing; 
   }
 
