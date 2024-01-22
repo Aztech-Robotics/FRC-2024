@@ -1,31 +1,23 @@
 package frc.robot;
 
+import java.util.Optional;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.lib.IAuto;
-import frc.robot.commands.MotorJoystick;
+import frc.robot.auto.IAuto;
 import frc.robot.subsystems.Drive;
-import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Drive.DriveControlState;
 
 public class Robot extends TimedRobot {
-  private Drive mDrive; 
-  private Shooter mShooter; 
+  private Telemetry mTelemetry = new Telemetry(); 
+  private Drive mDrive = Drive.getInstance(); 
+  private Optional<IAuto> mAutoMode = Optional.empty(); 
   private Command mAutonomousCommand;
 
-  public static boolean flipAlliance (){
-    return true; 
-  }
-
   @Override
-  public void robotInit() {
-    mDrive = Drive.getInstance(); 
-    mShooter = Shooter.getInstance(); 
-    mShooter.setDefaultCommand(new MotorJoystick());
-    Telemetry.displayAutos();
-  }
+  public void robotInit() {}
 
   @Override
   public void robotPeriodic() {
@@ -39,16 +31,16 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledPeriodic() {
-    
+    mTelemetry.updateAutoModeCreator();
+    mAutoMode = mTelemetry.getAutoModeSelected(); 
   }
 
   @Override
   public void autonomousInit() {
-    IAuto autoSelected = Telemetry.autoChooser.getSelected(); 
-    if (autoSelected != null) {
+    if (mAutoMode.isPresent()) {
       mDrive.setKinematicsLimits(Constants.Drive.uncappedLimits);
-      mDrive.resetOdometry(autoSelected.getStartingPose()); 
-      mAutonomousCommand = autoSelected.getAutoCommand(); 
+      mDrive.resetOdometry(mAutoMode.get().getStartingPose()); 
+      mAutonomousCommand = mAutoMode.get().getAutoCommand(); 
       mAutonomousCommand.schedule();
     }
   }
@@ -68,12 +60,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     if (ControlBoard.driver.getAButtonPressed()) {
-      mDrive.setYawAngle(180); 
-    }
-    if (ControlBoard.driver.getBButtonPressed()) {
-      mDrive.setDriveControlState(DriveControlState.ForceOrient);
-    } else if (ControlBoard.driver.getBButtonReleased()) {
-      mDrive.setDriveControlState(DriveControlState.TeleopControl);
+      mDrive.setYawAngle(0); 
     }
     if (ControlBoard.driver.getPOV() != -1) {
       mDrive.setHeadingControl(Rotation2d.fromDegrees(ControlBoard.driver.getPOV()));
@@ -89,8 +76,7 @@ public class Robot extends TimedRobot {
   public void testPeriodic() {}
 
   @Override
-  public void simulationInit() {
-  }
+  public void simulationInit() {}
 
   @Override
   public void simulationPeriodic() {}

@@ -21,10 +21,8 @@ import frc.lib.swerve.ModuleState;
 import frc.lib.swerve.SwerveDriveKinematics;
 import frc.lib.swerve.SwerveDrivePoseEstimator;
 import frc.lib.swerve.SwerveModule;
-import frc.lib.vision.LimelightHelpers;
 import frc.robot.Constants;
 import frc.robot.ControlBoard;
-import frc.robot.Robot;
 import frc.robot.Telemetry; 
 import frc.robot.Constants.SwerveModules;
 import frc.robot.Constants.Drive.DriveControlMode;
@@ -121,17 +119,13 @@ public class Drive extends SubsystemBase {
     mPeriodicIO.meas_module_states = getModulesStates(); 
     mPeriodicIO.meas_chassis_speeds = swerveKinematics.toChassisSpeeds(mPeriodicIO.meas_module_states); 
     mPeriodicIO.robot_pose = mOdometry.update(mPeriodicIO.yawAngle, mPeriodicIO.meas_module_states); 
-    if (getTagId() != -1) {
-      mOdometry.addVisionMeasurement(Robot.flipAlliance() ? LimelightHelpers.getBotPose2d_wpiRed("limelight") : LimelightHelpers.getBotPose2d_wpiBlue("limelight"), 
-      Timer.getFPGATimestamp() - (LimelightHelpers.getLatency_Pipeline("limelight")/1000.0) - (LimelightHelpers.getLatency_Capture("limelight")/1000.0));
-    }
   }
 
   public void writePeriodicOutputs () {
     updateSetpoint();
     setModulesStates(mPeriodicIO.des_module_states); 
     for (SwerveModule module : swerveModules) {
-      module.writePeriodicOutputs();
+      module.writePeriodicOutputs(); 
     }
   }
   
@@ -315,16 +309,11 @@ public class Drive extends SubsystemBase {
     mControlState = DriveControlState.HeadingControl; 
   }
 
-  public int getTagId () {
-    return (int)LimelightHelpers.getFiducialID("limelight"); 
-  }
-
   public void outputTelemetry (){
-    ShuffleboardLayout robot_pose = Telemetry.swerveTab.getLayout("Robot Pose", BuiltInLayouts.kList).withSize(2, 3).withPosition(8, 0);
+    ShuffleboardLayout robot_pose = Telemetry.mSwerveTab.getLayout("Robot Pose", BuiltInLayouts.kList).withSize(2, 3).withPosition(8, 0);
     robot_pose.addDouble("X", () -> mPeriodicIO.robot_pose.getX());
     robot_pose.addDouble("Y", () -> mPeriodicIO.robot_pose.getY());
     robot_pose.addDouble("Theta", () -> mPeriodicIO.robot_pose.getRotation().getDegrees());
-    Telemetry.swerveTab.addDouble("Yaw Angle", () -> mPeriodicIO.yawAngle.getDegrees()).withPosition(0, 3); 
-    Telemetry.swerveTab.addInteger("Tag ID", () -> getTagId()).withPosition(1, 3); 
+    Telemetry.mSwerveTab.addDouble("Yaw Angle", () -> mPeriodicIO.yawAngle.getDegrees()).withPosition(0, 3); 
   }
 }

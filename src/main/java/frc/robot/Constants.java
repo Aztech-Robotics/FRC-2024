@@ -2,6 +2,7 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.util.Units;
 import frc.lib.swerve.SwerveModule.SwerveModuleConstants;
 
@@ -12,6 +13,18 @@ public final class Constants {
     public static class Field {
         public static final double length = 16.54; 
         public static final double width = 8.21; 
+    }
+
+    public static class Shooter {
+        public static final int id_motor1 = 14; 
+        public static final int id_motor2 = 15; 
+    }
+
+    public static TrajectoryConfig createTrajConfig (double maxVel, double maxAccel) {
+        TrajectoryConfig config = new TrajectoryConfig(maxVel, maxAccel);
+        config.setStartVelocity(0); 
+        config.setEndVelocity(0); 
+        return new TrajectoryConfig(maxVel, maxAccel);
     }
 
     public static class Drive {

@@ -16,15 +16,15 @@ public class DriveMotionPlanner {
         new ProfiledPIDController(0, 0, 0, new Constraints(0, 0))
     );
     private Trajectory currentTrajectory; 
-    private Rotation2d heading_setpoint; 
+    private Rotation2d targetRotation; 
     private Double startTime;
     private boolean isTrajectoryFinished = false;
 
     public DriveMotionPlanner () {}
 
-    public void setTrajectory (Trajectory trajectory, Pose2d current_pose, ChassisSpeeds current_speeds, Rotation2d heading_setpoint){
+    public void setTrajectory (Trajectory trajectory, Pose2d current_pose, ChassisSpeeds current_speeds, Rotation2d target_rotation){
         currentTrajectory = trajectory; 
-        this.heading_setpoint = heading_setpoint; 
+        this.targetRotation = target_rotation; 
         isTrajectoryFinished = false; 
         startTime = Double.NaN; 
     }
@@ -44,7 +44,7 @@ public class DriveMotionPlanner {
                 currentTrajectory = null; 
             }
             if (desired_state != null) {
-                desired_ChassisSpeeds = driveController.calculate(current_pose, desired_state, heading_setpoint); 
+                desired_ChassisSpeeds = driveController.calculate(current_pose, desired_state, targetRotation); 
             } 
         } 
         return desired_ChassisSpeeds; 

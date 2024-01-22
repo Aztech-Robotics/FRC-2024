@@ -182,7 +182,7 @@ public class SwerveModule {
     }
 
     public void outputTelemetry (){
-        ShuffleboardLayout motorsData = Telemetry.swerveTab.getLayout("Module " + moduleNumber, BuiltInLayouts.kList)
+        ShuffleboardLayout motorsData = Telemetry.mSwerveTab.getLayout("Module " + moduleNumber, BuiltInLayouts.kList)
         .withSize(2, 3).withPosition(2 * moduleNumber, 0);
         motorsData.addDouble("Desired Angle", () -> targetModuleState.angle.getDegrees());
         motorsData.addDouble("Current Angle", () -> mPeriodicIO.currentAngle); 

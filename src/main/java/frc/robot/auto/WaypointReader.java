@@ -1,9 +1,10 @@
-package frc.lib;
+package frc.robot.auto;
 
 import edu.wpi.first.math.spline.Spline;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import frc.robot.Constants;
 import frc.robot.Robot;
+import frc.robot.Telemetry;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -35,7 +36,7 @@ public class WaypointReader {
                 double x = Double.parseDouble(split[0]);
                 double x_tan = Double.parseDouble(split[2]);
 
-                if (Robot.flipAlliance()) {
+                if (Telemetry.isRedAlliance()) {
                     x = Constants.Field.length - x;
                     x_tan = - x_tan;
                 }
