@@ -29,8 +29,8 @@ public final class Constants {
 
     public static class Drive {
         public static final int id_pigeon = 13;
-        public static final double track_width = 0.57; 
-        public static final double wheel_base = 0.57; 
+        public static final double track_width = 0.57; //19.5in 28
+        public static final double wheel_base = 0.57; //21.5in 31.5
         public static final SwerveDriveKinematics swerveKinematics = new SwerveDriveKinematics(
             new Translation2d(wheel_base / 2.0, track_width / 2.0),
             new Translation2d(wheel_base / 2.0, -track_width / 2.0),

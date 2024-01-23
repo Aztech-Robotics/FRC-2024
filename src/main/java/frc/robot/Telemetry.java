@@ -2,6 +2,7 @@ package frc.robot;
 
 import java.util.Optional;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -27,11 +28,11 @@ public class Telemetry {
     public Telemetry () {
         mAllianceChooser.setDefaultOption("BLUE", Alliance.Blue);
         mAllianceChooser.addOption("RED", Alliance.Red);
-        mDriverTab.add("ALLIANCE", mAllianceChooser); 
+        mDriverTab.add("ALLIANCE", mAllianceChooser).withPosition(7, 0); 
         mAutoChooser.setDefaultOption("DO NOTHING", AutoMode.DO_NOTHING);
         mAutoChooser.addOption("THREE CLOSEST NOTES", AutoMode.THREE_CLOSEST_NOTES); 
         mAutoChooser.addOption("TEST PATH", AutoMode.TEST_PATH); 
-        mDriverTab.add("AUTO MODE", mAutoChooser); 
+        mDriverTab.add("AUTO MODE", mAutoChooser).withPosition(8, 0).withSize(2, 1); 
     }
 
     public void updateAutoModeCreator () {
@@ -47,6 +48,7 @@ public class Telemetry {
         }
         if (mCachedDesiredMode != desiredAutoMode || alliance_changed) {
             mAutoMode = getAutoMode(desiredAutoMode); 
+            DriverStation.reportWarning("Regenerando Auto " + desiredAutoMode.name(), alliance_changed);
         }
         mCachedDesiredMode = desiredAutoMode; 
     }

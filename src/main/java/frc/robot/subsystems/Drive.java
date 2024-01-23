@@ -15,6 +15,8 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.swerve.DriveMotionPlanner;
 import frc.lib.swerve.ModuleState;
@@ -53,6 +55,7 @@ public class Drive extends SubsystemBase {
   private DriveMotionPlanner mMotionPlanner; 
   private boolean odometryReset = false; 
   private PIDController snapController = new PIDController(3.5, 0, 0); 
+  private Field2d field = new Field2d();
 
   private Drive() {
     swerveModules = new SwerveModule[] {
@@ -62,11 +65,10 @@ public class Drive extends SubsystemBase {
       new SwerveModule(SwerveModules.MOD3, 3)
     };
     pigeon.reset(); 
-    pigeon.setYaw(180);
     mOdometry = new SwerveDrivePoseEstimator(
       swerveKinematics, getModulesStates(), new Pose2d(), 
       new Matrix<>(Nat.N3(), Nat.N1()), 
-      new Matrix<>(Nat.N3(), Nat.N1())
+      new Matrix<>(Nat.N3(), Nat.N1()) 
     ); 
     mMotionPlanner = new DriveMotionPlanner(); 
     for (SwerveModule module : swerveModules){
@@ -119,6 +121,7 @@ public class Drive extends SubsystemBase {
     mPeriodicIO.meas_module_states = getModulesStates(); 
     mPeriodicIO.meas_chassis_speeds = swerveKinematics.toChassisSpeeds(mPeriodicIO.meas_module_states); 
     mPeriodicIO.robot_pose = mOdometry.update(mPeriodicIO.yawAngle, mPeriodicIO.meas_module_states); 
+    field.setRobotPose(mPeriodicIO.robot_pose); 
   }
 
   public void writePeriodicOutputs () {
@@ -265,6 +268,10 @@ public class Drive extends SubsystemBase {
     pigeon.setYaw(angle); 
   }
 
+  public Rotation2d getYawAngle () {
+    return mPeriodicIO.yawAngle; 
+  }
+
   public void toggleDriveControl (){
     mPeriodicIO.driveControlMode = mPeriodicIO.driveControlMode == DriveControlMode.PercentOutput? 
     DriveControlMode.Velocity : DriveControlMode.PercentOutput; 
@@ -315,5 +322,6 @@ public class Drive extends SubsystemBase {
     robot_pose.addDouble("Y", () -> mPeriodicIO.robot_pose.getY());
     robot_pose.addDouble("Theta", () -> mPeriodicIO.robot_pose.getRotation().getDegrees());
     Telemetry.mSwerveTab.addDouble("Yaw Angle", () -> mPeriodicIO.yawAngle.getDegrees()).withPosition(0, 3); 
+    Telemetry.mDriverTab.add(field).withPosition(0, 0).withSize(7, 4);
   }
 }

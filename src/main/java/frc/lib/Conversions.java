@@ -10,6 +10,6 @@ public class Conversions {
     }
 
     public static double unsignedToSignedDeg (double angle) {
-        return mod((angle + 180), 360) - 180;
+        return mod((angle + 180), 360) - 180; 
     }
 }

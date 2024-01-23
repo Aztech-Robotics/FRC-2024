@@ -3,7 +3,6 @@ package frc.robot.auto;
 import edu.wpi.first.math.spline.Spline;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import frc.robot.Constants;
-import frc.robot.Robot;
 import frc.robot.Telemetry;
 
 import java.io.BufferedReader;
@@ -11,9 +10,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 
-/* FROM FRC 4277 */
-
 public class WaypointReader {
+    private static final double PATHWEAVER_Y_OFFSET = 8.0137;
     /**
      * Get control vector list from path file
      * @param pathName Specify the {THIS} in src/main/deploy/waypoints/{THIS}.path
@@ -35,14 +33,16 @@ public class WaypointReader {
                 String[] split = line.split(",");
                 double x = Double.parseDouble(split[0]);
                 double x_tan = Double.parseDouble(split[2]);
-
+                double y = Double.parseDouble(split[1]) + PATHWEAVER_Y_OFFSET; 
+                double y_tan = Double.parseDouble(split[3]);
                 if (Telemetry.isRedAlliance()) {
                     x = Constants.Field.length - x;
                     x_tan = - x_tan;
                 }
                 controlVectors.add(new Spline.ControlVector(
-                        new double[]{x, x_tan, 0},
-                        new double[]{Double.parseDouble(split[1]), Double.parseDouble(split[3]), 0}));
+                    new double[]{x - 1.3, x_tan, 0},
+                    new double[]{y - 0.3, y_tan, 0})
+                );
 
                 line = reader.readLine();
             }

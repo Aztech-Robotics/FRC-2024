@@ -46,7 +46,7 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {} 
 
   @Override
   public void teleopInit() {
@@ -55,6 +55,7 @@ public class Robot extends TimedRobot {
     }
     mDrive.setKinematicsLimits(Constants.Drive.oneMPSLimits); 
     mDrive.setDriveControlState(DriveControlState.TeleopControl); 
+    mDrive.setYawAngle(0);
   }
 
   @Override
@@ -63,7 +64,7 @@ public class Robot extends TimedRobot {
       mDrive.setYawAngle(0); 
     }
     if (ControlBoard.driver.getPOV() != -1) {
-      mDrive.setHeadingControl(Rotation2d.fromDegrees(ControlBoard.driver.getPOV()));
+      mDrive.setHeadingControl(Rotation2d.fromDegrees(ControlBoard.driver.getPOV())); 
     }
   }
 
