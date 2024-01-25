@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 public class WaypointReader {
-    private static final double PATHWEAVER_Y_OFFSET = 8.0137;
+    private static final double PATHWEAVER_Y_OFFSET = 8.01367968; 
     /**
      * Get control vector list from path file
      * @param pathName Specify the {THIS} in src/main/deploy/waypoints/{THIS}.path
@@ -39,11 +39,12 @@ public class WaypointReader {
                     x = Constants.Field.length - x;
                     x_tan = - x_tan;
                 }
-                controlVectors.add(new Spline.ControlVector(
-                    new double[]{x - 1.3, x_tan, 0},
-                    new double[]{y - 0.3, y_tan, 0})
+                controlVectors.add(
+                    new Spline.ControlVector(
+                        new double[]{x, x_tan, 0},
+                        new double[]{y, y_tan, 0}
+                    )
                 );
-
                 line = reader.readLine();
             }
         }

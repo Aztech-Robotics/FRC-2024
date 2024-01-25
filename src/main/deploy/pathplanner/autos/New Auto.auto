@@ -1,0 +1,37 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 1.4,
+      "y": 5.55
+    },
+    "rotation": 0
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "SPK_RIGHT"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RIGHT_CENTER"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "CENTER_LEFT"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": false
+}

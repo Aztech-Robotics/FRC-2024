@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.swerve.DriveMotionPlanner;
 import frc.lib.swerve.ModuleState;
@@ -86,7 +85,7 @@ public class Drive extends SubsystemBase {
     return mDrive;
   }
 
-  public static class PeriodicIO {
+  public static class PeriodicIO { 
     //Inputs
     double timestamp = 0; 
     Rotation2d yawAngle = new Rotation2d(); 

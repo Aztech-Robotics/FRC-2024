@@ -14,7 +14,7 @@ import frc.robot.commands.FollowPath;
 import frc.robot.commands.ResetGyroRedAlliance;
 
 public class TestPath implements IAuto {
-    private final Trajectory mTestPath;
+    private final Trajectory mTestPath; 
     private final Pose2d mStartingPose;
 
     public TestPath () {
