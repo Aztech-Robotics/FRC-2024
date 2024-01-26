@@ -52,7 +52,9 @@ public class Intake extends SubsystemBase {
   @Override
   public void periodic() {
     readPeriodicInputs();
-    if (mControlState == IntakeControlState.VariableVelocity) {
+    if (mControlState == IntakeControlState.None) {
+      mPeriodicIO.des_vel = 0; 
+    } else if (mControlState == IntakeControlState.VariableVelocity) {
       mPeriodicIO.des_vel = ControlBoard.getTriggersC0().getAsDouble(); 
     } else if (mControlState == IntakeControlState.ConstantVelocity) {
       mPeriodicIO.des_vel = mConstantVel; 
