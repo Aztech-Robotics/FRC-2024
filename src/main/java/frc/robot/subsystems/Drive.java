@@ -5,13 +5,16 @@ import com.ctre.phoenix6.hardware.Pigeon2;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
+import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
@@ -37,7 +40,8 @@ public class Drive extends SubsystemBase {
   private PeriodicIO mPeriodicIO = new PeriodicIO(); 
   public enum DriveControlState {
     TeleopControl,
-    HeadingControl,
+    HeadingControl, 
+    DriveToPose, 
     PathFollowing,
     ForceOrient,
     None
@@ -53,6 +57,10 @@ public class Drive extends SubsystemBase {
   private SwerveDrivePoseEstimator mOdometry; 
   private DriveMotionPlanner mMotionPlanner; 
   private boolean odometryReset = false; 
+  private HolonomicDriveController poseController = new HolonomicDriveController(
+    new PIDController(0, 0, 0), new PIDController(0, 0, 0), 
+    new ProfiledPIDController(0, 0, 0, new Constraints(0, 0))
+  );
   private PIDController snapController = new PIDController(3.5, 0, 0); 
   private Field2d field = new Field2d();
 
@@ -154,6 +162,8 @@ public class Drive extends SubsystemBase {
       }
     } else if (mControlState == DriveControlState.PathFollowing) {
       mPeriodicIO.des_chassis_speeds = mMotionPlanner.update(mPeriodicIO.robot_pose, mPeriodicIO.timestamp);
+    } else if (mControlState == DriveControlState.DriveToPose) {
+      mPeriodicIO.des_chassis_speeds = poseController.calculate(mPeriodicIO.robot_pose, null, 0, null); 
     }
     writePeriodicOutputs();
   }

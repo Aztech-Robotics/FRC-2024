@@ -20,6 +20,10 @@ public final class Constants {
         public static final int id_motor2 = 15; 
     }
 
+    public static class Intake {
+        public static final int id_intake_motor = 14; 
+    }
+
     public static TrajectoryConfig createTrajConfig (double maxVel, double maxAccel) {
         TrajectoryConfig config = new TrajectoryConfig(maxVel, maxAccel);
         config.setStartVelocity(0); 
@@ -66,19 +70,7 @@ public final class Constants {
         
         public static final KinematicLimits uncappedLimits = new KinematicLimits();
         public static final KinematicLimits autoLimits = new KinematicLimits(3.5, 4, Math.PI, Math.PI);  
-        public static final KinematicLimits oneMPSLimits = new KinematicLimits(3, Math.PI);  
-
-        public static final double kp_translational = 0;
-        public static final double ki_translational = 0;
-        public static final double kd_translational = 0;
-        
-        public static final double kp_theta = 4.75;
-        public static final double ki_theta = 0;
-        public static final double kd_theta = 0.11; 
-
-        public static final double kp_snap = 0;
-        public static final double ki_snap = 0;
-        public static final double kd_snap = 0; 
+        public static final KinematicLimits oneMPSLimits = new KinematicLimits(3, Math.PI); 
     }
 
     public static class SwerveModules {

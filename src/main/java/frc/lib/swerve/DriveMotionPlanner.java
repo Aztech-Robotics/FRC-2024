@@ -9,11 +9,12 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.Timer;
+import frc.robot.Constants.Drive;
 
 public class DriveMotionPlanner {    
-    private final HolonomicDriveController driveController = new HolonomicDriveController(
+    private final HolonomicDriveController autoController = new HolonomicDriveController(
         new PIDController(0, 0, 0), new PIDController(0, 0, 0), 
-        new ProfiledPIDController(0, 0, 0, new Constraints(0, 0))
+        new ProfiledPIDController(0, 0, 0, new Constraints(Drive.autoLimits.kMaxAngularVelocity, Drive.autoLimits.kMaxAngularAccel))
     );
     private Trajectory currentTrajectory; 
     private Rotation2d targetRotation; 
@@ -44,7 +45,7 @@ public class DriveMotionPlanner {
                 currentTrajectory = null; 
             }
             if (desired_state != null) {
-                desired_ChassisSpeeds = driveController.calculate(current_pose, desired_state, targetRotation); 
+                desired_ChassisSpeeds = autoController.calculate(current_pose, desired_state, targetRotation); 
             } 
         } 
         return desired_ChassisSpeeds; 
@@ -65,7 +66,7 @@ public class DriveMotionPlanner {
                 currentTrajectory = null; 
             }
             if (desired_state != null) {
-                desired_ChassisSpeeds = driveController.calculate(current_pose, desired_state, tagAngleOverride); 
+                desired_ChassisSpeeds = autoController.calculate(current_pose, desired_state, tagAngleOverride); 
             } 
         } 
         return desired_ChassisSpeeds; 

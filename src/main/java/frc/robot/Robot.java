@@ -8,11 +8,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.auto.IAuto;
 import frc.robot.subsystems.Drive;
+import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Drive.DriveControlState;
+import frc.robot.subsystems.Intake.IntakeControlState;
 
 public class Robot extends TimedRobot {
   private Telemetry mTelemetry = new Telemetry(); 
   private Drive mDrive = Drive.getInstance(); 
+  private Intake mIntake = Intake.getInstance(); 
   private Optional<IAuto> mAutoMode = Optional.empty(); 
   private Command mAutonomousCommand;
 
@@ -55,7 +58,7 @@ public class Robot extends TimedRobot {
     }
     mDrive.setKinematicsLimits(Constants.Drive.oneMPSLimits); 
     mDrive.setDriveControlState(DriveControlState.TeleopControl); 
-    mDrive.setYawAngle(0);
+    mIntake.setIntakeControlState(IntakeControlState.VariableVelocity);
   }
 
   @Override
@@ -65,6 +68,14 @@ public class Robot extends TimedRobot {
     }
     if (ControlBoard.driver.getPOV() != -1) {
       mDrive.setHeadingControl(Rotation2d.fromDegrees(ControlBoard.driver.getPOV())); 
+    }
+    if (ControlBoard.driver.getRightBumperPressed()) {
+      mIntake.keepCurrentVel();
+    }
+    if (ControlBoard.driver.getLeftBumperPressed()) {
+      mIntake.setIntakeControlState(IntakeControlState.ConstantVelocity); 
+    } else if (ControlBoard.driver.getLeftBumperReleased()) {
+      mIntake.setIntakeControlState(IntakeControlState.VariableVelocity); 
     }
   }
 
