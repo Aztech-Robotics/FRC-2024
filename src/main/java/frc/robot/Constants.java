@@ -1,7 +1,5 @@
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.util.Units;
 import frc.lib.swerve.SwerveModule.SwerveModuleConstants;
@@ -33,14 +31,8 @@ public final class Constants {
 
     public static class Drive {
         public static final int id_pigeon = 13;
-        public static final double track_width = 0.57; //19.5in 28
-        public static final double wheel_base = 0.57; //21.5in 31.5
-        public static final SwerveDriveKinematics swerveKinematics = new SwerveDriveKinematics(
-            new Translation2d(wheel_base / 2.0, track_width / 2.0),
-            new Translation2d(wheel_base / 2.0, -track_width / 2.0),
-            new Translation2d(-wheel_base / 2.0, track_width / 2.0),
-            new Translation2d(-wheel_base / 2.0, -track_width / 2.0)
-        );
+        public static final double track_width = Units.inchesToMeters(19.5); //19.5in 28
+        public static final double wheel_base = Units.inchesToMeters(21.5); //21.5in 31.5
 
         public enum DriveControlMode {
             Velocity,
@@ -83,16 +75,16 @@ public final class Constants {
         public static final SwerveModuleConstants MOD2 = new SwerveModuleConstants(7, 8, 9, 83.6); 
         public static final SwerveModuleConstants MOD3 = new SwerveModuleConstants(10, 11, 12, 0); 
 
-        public static final double steer_kP = 1.28;
-        public static final double steer_kI = 0.5; //0.155 .5
-        public static final double steer_kD = 0;
-        public static final double steer_kS = 0.5;
-        public static final double steer_kV = 0;
+        public static double steer_kP = 1.28;
+        public static double steer_kI = 0.5; //0.155 .5
+        public static double steer_kD = 0;
+        public static double steer_kS = 0.5;
+        public static double steer_kV = 0;
         
-        public static final double drive_kP = 1.82e-4;
-        public static final double drive_kI = 0;
-        public static final double drive_kD = 0;
-        public static final double drive_kFF = 0;
+        public static double drive_kP = 1.82e-4;
+        public static double drive_kI = 0;
+        public static double drive_kD = 0;
+        public static double drive_kFF = 0; 
 
         public static final double posCoefficient = wheelCircumference / drive_gear_ratio;
         public static final double velCoefficient = posCoefficient / 60; 

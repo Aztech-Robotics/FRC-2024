@@ -16,9 +16,8 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.swerve.DriveMotionPlanner;
 import frc.lib.swerve.ModuleState;
@@ -26,16 +25,16 @@ import frc.lib.swerve.SwerveDriveKinematics;
 import frc.lib.swerve.SwerveDrivePoseEstimator;
 import frc.lib.swerve.SwerveModule;
 import frc.robot.Constants;
+import frc.robot.Constants.SwerveModules;
 import frc.robot.ControlBoard;
 import frc.robot.Telemetry; 
-import frc.robot.Constants.SwerveModules;
 import frc.robot.Constants.Drive.DriveControlMode;
 import frc.robot.Constants.Drive.KinematicLimits;
 
 public class Drive extends SubsystemBase {
   private static Drive mDrive;
-  private SwerveModule[] swerveModules;
-  private Pigeon2 pigeon = new Pigeon2(Constants.Drive.id_pigeon); 
+  private SwerveModule[] mSwerveModules;
+  private Pigeon2 mPigeon = new Pigeon2(Constants.Drive.id_pigeon); 
 
   private PeriodicIO mPeriodicIO = new PeriodicIO(); 
   public enum DriveControlState {
@@ -63,22 +62,24 @@ public class Drive extends SubsystemBase {
   );
   private PIDController snapController = new PIDController(3.5, 0, 0); 
   private Field2d field = new Field2d();
+  public boolean isTuningMode = false; 
+  public boolean recordingDataLog = false; 
 
   private Drive() {
-    swerveModules = new SwerveModule[] {
+    mSwerveModules = new SwerveModule[] {
       new SwerveModule(SwerveModules.MOD0, 0),
       new SwerveModule(SwerveModules.MOD1, 1),
       new SwerveModule(SwerveModules.MOD2, 2),
       new SwerveModule(SwerveModules.MOD3, 3)
     };
-    pigeon.reset(); 
+    mPigeon.reset(); 
     mOdometry = new SwerveDrivePoseEstimator(
       swerveKinematics, getModulesStates(), new Pose2d(), 
       new Matrix<>(Nat.N3(), Nat.N1()), 
       new Matrix<>(Nat.N3(), Nat.N1()) 
     ); 
     mMotionPlanner = new DriveMotionPlanner(); 
-    for (SwerveModule module : swerveModules){
+    for (SwerveModule module : mSwerveModules){
       module.outputTelemetry(); 
     }
     snapController.enableContinuousInput(-Math.PI, Math.PI);
@@ -119,10 +120,10 @@ public class Drive extends SubsystemBase {
 
   public void readPeriodicInputs () {
     mPeriodicIO.timestamp = Timer.getFPGATimestamp(); 
-    StatusSignal<Double> yawAngle = pigeon.getYaw(); 
+    StatusSignal<Double> yawAngle = mPigeon.getPitch(); 
     yawAngle.refresh();
     mPeriodicIO.yawAngle = Rotation2d.fromDegrees(yawAngle.getValue()); 
-    for (SwerveModule module : swerveModules) {
+    for (SwerveModule module : mSwerveModules) {
       module.readPeriodicInputs();
     }
     mPeriodicIO.meas_module_states = getModulesStates(); 
@@ -134,7 +135,7 @@ public class Drive extends SubsystemBase {
   public void writePeriodicOutputs () {
     updateSetpoint();
     setModulesStates(mPeriodicIO.des_module_states); 
-    for (SwerveModule module : swerveModules) {
+    for (SwerveModule module : mSwerveModules) {
       module.writePeriodicOutputs(); 
     }
   }
@@ -166,6 +167,7 @@ public class Drive extends SubsystemBase {
       mPeriodicIO.des_chassis_speeds = poseController.calculate(mPeriodicIO.robot_pose, null, 0, null); 
     }
     writePeriodicOutputs();
+    if (isTuningMode) feedTuningMode(); 
   }
 
   private void updateSetpoint () {
@@ -241,7 +243,7 @@ public class Drive extends SubsystemBase {
   }
 
   public void resetModulesToZero () {
-    for (SwerveModule module : swerveModules) {
+    for (SwerveModule module : mSwerveModules) {
       module.resetModule(); 
     }
   }
@@ -252,15 +254,15 @@ public class Drive extends SubsystemBase {
         modState.speedMetersPerSecond = modState.speedMetersPerSecond / mKinematicLimits.kMaxDriveVelocity; 
       }
     }
-    for (int i = 0; i < swerveModules.length; i++) {
-      swerveModules[i].setModuleState(modulesStates[i], mPeriodicIO.driveControlMode);
+    for (int i = 0; i < mSwerveModules.length; i++) {
+      mSwerveModules[i].setModuleState(modulesStates[i], mPeriodicIO.driveControlMode);
     }
   }
 
   private ModuleState[] getModulesStates () {
     ModuleState[] moduleStates = new ModuleState[4]; 
     for (int i = 0; i < 4; i++){
-      moduleStates[i] = swerveModules[i].getModuleState();
+      moduleStates[i] = mSwerveModules[i].getModuleState();
     }
     return moduleStates; 
   }
@@ -270,11 +272,11 @@ public class Drive extends SubsystemBase {
   }
 
   public void resetGyro () {
-    pigeon.reset(); 
+    mPigeon.reset(); 
   }
 
   public void setYawAngle (double angle) {
-    pigeon.setYaw(angle); 
+    mPigeon.setYaw(angle); 
   }
 
   public Rotation2d getYawAngle () {
@@ -295,7 +297,7 @@ public class Drive extends SubsystemBase {
   }
 
   public void resetOdometry (Pose2d pose) {
-    for (SwerveModule module : swerveModules) {
+    for (SwerveModule module : mSwerveModules) {
       module.resetModule();
     }
     setYawAngle(pose.getRotation().getDegrees());
@@ -303,16 +305,12 @@ public class Drive extends SubsystemBase {
     odometryReset = true; 
   }
 
-  public Pose2d getPose () {
-    return mOdometry.getEstimatedPosition(); 
-  }
-
   public boolean isReadyForAuto () {
     return odometryReset; 
   }
 
   public void setTrajectory (Trajectory trajectory, Rotation2d targetRotation) {
-    mMotionPlanner.setTrajectory(trajectory, getPose(), mPeriodicIO.meas_chassis_speeds, targetRotation); 
+    mMotionPlanner.setTrajectory(trajectory, mPeriodicIO.robot_pose, mPeriodicIO.meas_chassis_speeds, targetRotation); 
     mControlState = DriveControlState.PathFollowing; 
   }
 
@@ -325,12 +323,45 @@ public class Drive extends SubsystemBase {
     mControlState = DriveControlState.HeadingControl; 
   }
 
-  public void outputTelemetry (){
-    ShuffleboardLayout robot_pose = Telemetry.mSwerveTab.getLayout("Robot Pose", BuiltInLayouts.kList).withSize(2, 3).withPosition(8, 0);
-    robot_pose.addDouble("X", () -> mPeriodicIO.robot_pose.getX());
-    robot_pose.addDouble("Y", () -> mPeriodicIO.robot_pose.getY());
-    robot_pose.addDouble("Theta", () -> mPeriodicIO.robot_pose.getRotation().getDegrees());
-    Telemetry.mSwerveTab.addDouble("Yaw Angle", () -> mPeriodicIO.yawAngle.getDegrees()).withPosition(0, 3); 
+  public void setTuningMode (boolean active) {
+    isTuningMode = active; 
+    for (SwerveModule module : mSwerveModules) {
+      module.setTuningMode(active); 
+    }
+  }
+
+  private void feedTuningMode () {
+    if (!SmartDashboard.containsKey("Drive Kp")) {
+      SmartDashboard.putNumber("Drive Kp", SwerveModules.drive_kP); 
+      SmartDashboard.putNumber("Drive Ki", SwerveModules.drive_kI); 
+      SmartDashboard.putNumber("Drive Kd", SwerveModules.drive_kD); 
+      SmartDashboard.putNumber("Steer Kp", SwerveModules.steer_kP); 
+      SmartDashboard.putNumber("Steer Ki", SwerveModules.steer_kI); 
+      SmartDashboard.putNumber("Steer Kd", SwerveModules.steer_kD); 
+    }
+
+    double drive_kp = SmartDashboard.getNumber("Drive Kp", SwerveModules.drive_kP); 
+    double drive_ki = SmartDashboard.getNumber("Drive Ki", SwerveModules.drive_kI); 
+    double drive_kd = SmartDashboard.getNumber("Drive Kd", SwerveModules.drive_kD); 
+    double steer_kp = SmartDashboard.getNumber("Steer Kp", SwerveModules.steer_kP); 
+    double steer_ki = SmartDashboard.getNumber("Steer Ki", SwerveModules.steer_kI); 
+    double steer_kd = SmartDashboard.getNumber("Steer Kd", SwerveModules.steer_kD); 
+
+    if (SwerveModules.drive_kP != drive_kp) SwerveModules.drive_kP = drive_kp; 
+    if (SwerveModules.drive_kI != drive_ki) SwerveModules.drive_kI = drive_ki; 
+    if (SwerveModules.drive_kD != drive_kd) SwerveModules.drive_kD = drive_kd; 
+    if (SwerveModules.steer_kP != steer_kp) SwerveModules.steer_kP = steer_kp; 
+    if (SwerveModules.steer_kI != steer_ki) SwerveModules.steer_kI = steer_ki; 
+    if (SwerveModules.steer_kD != steer_kd) SwerveModules.steer_kD = steer_kd; 
+  }
+
+  public void recordDataLog (boolean active) {
+    for (SwerveModule swerveModule : mSwerveModules) { 
+      swerveModule.recordDataLog(active); 
+    }
+  }
+
+  private void outputTelemetry (){ 
     Telemetry.mDriverTab.add(field).withPosition(0, 0).withSize(7, 4);
   }
 }

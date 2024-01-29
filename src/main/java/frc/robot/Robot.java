@@ -3,6 +3,8 @@ package frc.robot;
 import java.util.Optional;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.util.datalog.DataLog;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -13,14 +15,24 @@ import frc.robot.subsystems.Drive.DriveControlState;
 import frc.robot.subsystems.Intake.IntakeControlState;
 
 public class Robot extends TimedRobot {
-  private Telemetry mTelemetry = new Telemetry(); 
-  private Drive mDrive = Drive.getInstance(); 
-  private Intake mIntake = Intake.getInstance(); 
+  private Telemetry mTelemetry; 
+  private Drive mDrive; 
+  private Intake mIntake; 
   private Optional<IAuto> mAutoMode = Optional.empty(); 
-  private Command mAutonomousCommand;
+  private Command mAutonomousCommand; 
+  private static DataLog log; 
+
+  public static DataLog getLog () {
+    if (log == null) log = DataLogManager.getLog(); 
+    return log; 
+  }
 
   @Override
-  public void robotInit() {}
+  public void robotInit() {
+    mTelemetry = new Telemetry(); 
+    mDrive = Drive.getInstance(); 
+    mIntake = Intake.getInstance(); 
+  }
 
   @Override
   public void robotPeriodic() {
@@ -29,7 +41,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledInit() {
-    mDrive.setDriveControlState(DriveControlState.None);
+    mDrive.setDriveControlState(DriveControlState.None); 
+    if (mDrive.recordingDataLog) mDrive.recordDataLog(false); 
+    if (mDrive.isTuningMode) mDrive.setTuningMode(false);
   }
 
   @Override
@@ -80,8 +94,11 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void testInit() {
-    CommandScheduler.getInstance().cancelAll();
+  public void testInit() { 
+    mDrive.setKinematicsLimits(Constants.Drive.oneMPSLimits); 
+    mDrive.setDriveControlState(DriveControlState.TeleopControl); 
+    mDrive.setTuningMode(true); 
+    mDrive.recordDataLog(true);
   }
 
   @Override

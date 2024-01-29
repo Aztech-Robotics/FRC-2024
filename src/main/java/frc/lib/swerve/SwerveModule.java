@@ -23,11 +23,15 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
+import frc.robot.Robot;
 import frc.robot.Telemetry;
+import frc.robot.Constants.SwerveModules;
 import frc.robot.Constants.Drive.DriveControlMode;
 
 public class SwerveModule {
@@ -42,7 +46,14 @@ public class SwerveModule {
     private PeriodicIO mPeriodicIO = new PeriodicIO(); 
     private ModuleState targetModuleState; 
 
-    public SwerveModule (SwerveModuleConstants moduleConstants, int moduleNumber){
+    private DoubleLogEntry rotation_demand_entry;
+    private DoubleLogEntry current_angle_entry;
+    private DoubleLogEntry drive_demand_entry;
+    private DoubleLogEntry current_velocity_entry; 
+    private boolean logActive = false; 
+    private boolean tuningActive = false; 
+
+    public SwerveModule (SwerveModuleConstants moduleConstants, int moduleNumber){ 
         this.moduleNumber = moduleNumber; 
         mSteerMotor = new TalonFX(moduleConstants.steerMotorID); 
         mDriveMotor = new CANSparkMax(moduleConstants.driveMotorID, MotorType.kBrushless);
@@ -62,7 +73,7 @@ public class SwerveModule {
         Slot0Configs slot0Configs = new Slot0Configs(); 
         slot0Configs.kP = Constants.SwerveModules.steer_kP;
         slot0Configs.kI = Constants.SwerveModules.steer_kI;
-        slot0Configs.kD = Constants.SwerveModules.steer_kD;
+        slot0Configs.kD = Constants.SwerveModules.steer_kD; 
         slot0Configs.kS = Constants.SwerveModules.steer_kS;
         slot0Configs.kV = Constants.SwerveModules.steer_kV; 
         //DriveMotor Config
@@ -92,6 +103,11 @@ public class SwerveModule {
         mSteerMotor.getConfigurator().apply(gral_config); 
         mDriveMotor.burnFlash();
         setNeutralMode(true); 
+
+        rotation_demand_entry = new DoubleLogEntry(Robot.getLog(), "/module_" + moduleNumber + "/rotation_demand"); 
+        current_angle_entry = new DoubleLogEntry(Robot.getLog(), "/module_" + moduleNumber + "/current_angle");  
+        drive_demand_entry = new DoubleLogEntry(Robot.getLog(), "/module_" + moduleNumber + "/drive_demand");  
+        current_velocity_entry = new DoubleLogEntry(Robot.getLog(), "/module_" + moduleNumber + "/current_velocity"); 
     }
 
     public static class PeriodicIO {
@@ -124,7 +140,7 @@ public class SwerveModule {
         mPeriodicIO.timestamp = Timer.getFPGATimestamp(); 
         StatusSignal<Double> absPosCancoder = mCANcoder.getAbsolutePosition(); 
         absPosCancoder.refresh(); 
-        mPeriodicIO.currentAngle = Rotation2d.fromRotations(absPosCancoder.getValue()).getDegrees();
+        mPeriodicIO.currentAngle = absPosCancoder.getValue();
         mPeriodicIO.velocity = driveMotorEncoder.getVelocity(); 
         mPeriodicIO.drivePosition = driveMotorEncoder.getPosition(); 
     }
@@ -135,7 +151,7 @@ public class SwerveModule {
         }
         double targetAngle = targetModuleState.angle.getDegrees(); 
         Rotation2d targetAngleRot = Rotation2d.fromDegrees(targetAngle); 
-        double currentAngle = mPeriodicIO.currentAngle;
+        double currentAngle = Rotation2d.fromRotations(mPeriodicIO.currentAngle).getDegrees();
         double targetVelocity = targetModuleState.speedMetersPerSecond; 
         if (Math.abs(targetAngle - currentAngle) > 90){
             targetAngleRot = targetAngle >= 180 ? Rotation2d.fromDegrees(targetAngle - 180) : Rotation2d.fromDegrees(targetAngle + 180); 
@@ -150,13 +166,15 @@ public class SwerveModule {
             mPeriodicIO.driveDemand = targetVelocity;
             drivePIDController.setReference(mPeriodicIO.driveDemand, ControlType.kDutyCycle, 0, 0);
         }
+        if (logActive) writeIOtoLog(); 
+        if (tuningActive) feedTunning();
     }
 
     public void resetModule (){
         driveMotorEncoder.setPosition(0); 
     }
 
-    public void setModuleState (ModuleState desiredModuleState, DriveControlMode controlMode) {
+    public void setModuleState (ModuleState desiredModuleState, DriveControlMode controlMode) { 
         targetModuleState = desiredModuleState; 
         mPeriodicIO.controlMode = controlMode; 
     }
@@ -167,7 +185,7 @@ public class SwerveModule {
 
     public void setNeutralMode (boolean wantBrake){
         MotorOutputConfigs neutralMode = new MotorOutputConfigs();
-        if (wantBrake) {
+        if (wantBrake) { 
             neutralMode.NeutralMode = NeutralModeValue.Brake;
             mDriveMotor.setIdleMode(IdleMode.kBrake);
         } else {
@@ -179,6 +197,42 @@ public class SwerveModule {
 
     public void setDriveControlMode (DriveControlMode mode){
         mPeriodicIO.controlMode = DriveControlMode.PercentOutput; 
+    }
+
+    public void recordDataLog (boolean active) {
+        logActive = active;
+    }
+
+    private void writeIOtoLog () {
+        rotation_demand_entry.append(mPeriodicIO.rotationDemand); 
+        current_angle_entry.append(mPeriodicIO.currentAngle); 
+        drive_demand_entry.append(mPeriodicIO.driveDemand); 
+        current_velocity_entry.append(mPeriodicIO.velocity); 
+    }
+
+    public void setTuningMode (boolean active) {
+        tuningActive = active; 
+    }
+
+    private void feedFFGains () {
+        if (!SmartDashboard.containsKey("M" + moduleNumber + " Drive kFF")) SmartDashboard.putNumber("M" + moduleNumber + " Drive kFF", SwerveModules.drive_kFF); 
+        double kFF = SmartDashboard.getNumber("M" + moduleNumber + " Drive kFF", SwerveModules.drive_kFF);
+        if (SwerveModules.drive_kFF != kFF) SwerveModules.drive_kFF = kFF; 
+        if (!SmartDashboard.containsKey("M" + moduleNumber + " Steer kS")) SmartDashboard.putNumber("M" + moduleNumber + " Steer kS", SwerveModules.steer_kS); 
+        double kS = SmartDashboard.getNumber("M" + moduleNumber + " Steer kS", SwerveModules.steer_kS);
+        if (SwerveModules.steer_kS != kS) SwerveModules.steer_kS = kS;  
+    }
+
+    private void feedTunning () {
+        feedFFGains(); 
+        if (drivePIDController.getP(0) != SwerveModules.drive_kP) drivePIDController.setP(SwerveModules.drive_kP, 0); 
+        if (drivePIDController.getI(0) != SwerveModules.drive_kI) drivePIDController.setI(SwerveModules.drive_kI, 0); 
+        if (drivePIDController.getD(0) != SwerveModules.drive_kD) drivePIDController.setD(SwerveModules.drive_kD, 0); 
+        if (drivePIDController.getFF(0) != SwerveModules.drive_kFF) drivePIDController.setFF(SwerveModules.drive_kFF, 0); 
+        Slot0Configs slot0Configs = new Slot0Configs();
+        mSteerMotor.getConfigurator().refresh(
+            slot0Configs.withKP(SwerveModules.steer_kP).withKI(SwerveModules.steer_kI).withKD(SwerveModules.steer_kD) 
+        );
     }
 
     public void outputTelemetry (){
