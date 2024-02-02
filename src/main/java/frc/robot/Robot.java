@@ -78,6 +78,7 @@ public class Robot extends TimedRobot {
     mDrive.setKinematicsLimits(Constants.Drive.oneMPSLimits); 
     mDrive.setDriveControlState(DriveControlState.TeleopControl); 
     mIntake.setIntakeControlState(IntakeControlState.VariableVelocity); 
+    mDrive.resetOdometry(new Pose2d());
   }
 
   @Override

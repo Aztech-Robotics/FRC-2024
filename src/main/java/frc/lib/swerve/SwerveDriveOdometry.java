@@ -55,7 +55,7 @@ public class SwerveDriveOdometry {
 	 * @param modulePositions The wheel positions reported by each module.
 	 */
 	public SwerveDriveOdometry (SwerveDriveKinematics kinematics, SwerveModulePosition[] modulePositions) {
-		this(kinematics, modulePositions, new Pose2d(), VecBuilder.fill(0, 0, 0), VecBuilder.fill(0, 0, 0)); 
+		this(kinematics, modulePositions, new Pose2d(), VecBuilder.fill(0.0001, 0.0001, 0.0001), VecBuilder.fill(0.00001, 0.00001, 0.00001)); 
 	}
 
 	/**
@@ -221,18 +221,18 @@ public class SwerveDriveOdometry {
 	public void addVisionMeasurement(Pose2d visionRobotPoseMeters, double timestampSeconds) {
 		// Step 0: If this measurement is old enough to be outside the pose buffer's timespan, skip.
 		try {
-		if (m_poseBuffer.getInternalBuffer().lastKey() - kBufferDuration > timestampSeconds) {
-			return;
-		}
+			if (m_poseBuffer.getInternalBuffer().lastKey() - kBufferDuration > timestampSeconds) {
+				return;
+			}
 		} catch (NoSuchElementException ex) {
-		return;
+			return;
 		}
 
 		// Step 1: Get the pose odometry measured at the moment the vision measurement was made.
-		var sample = m_poseBuffer.getSample(timestampSeconds);
+		var sample = m_poseBuffer.getSample(timestampSeconds); 
 
 		if (sample.isEmpty()) {
-		return;
+			return;
 		}
 
 		// Step 2: Measure the twist between the odometry pose and the vision pose.

@@ -120,7 +120,7 @@ public class Drive extends SubsystemBase {
     mPeriodicIO.meas_chassis_speeds = mSwerveKinematics.toChassisSpeeds(mPeriodicIO.meas_module_states); 
     mOdometry.update(mPeriodicIO.yawAngle, mPeriodicIO.meas_module_states); 
     Optional<Pose2d> visionPose = mVision.getVisionPose(); 
-    if (visionPose.isPresent()) mOdometry.addVisionMeasurement(visionPose.get(), mVision.getTimestamp(mPeriodicIO.timestamp));  
+    if (visionPose.isPresent()) mOdometry.addVisionMeasurement(visionPose.get(), mVision.getTimestamp(mPeriodicIO.timestamp)); 
     mPeriodicIO.robot_pose =  mOdometry.getPoseMeters(); 
     field.setRobotPose(mPeriodicIO.robot_pose); 
   }
