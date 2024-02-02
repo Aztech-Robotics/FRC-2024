@@ -14,8 +14,8 @@ public final class Constants {
     }
 
     public static class Shooter {
-        public static final int id_motor1 = 14; 
-        public static final int id_motor2 = 15; 
+        public static final int id_top_motor = 15; 
+        public static final int id_down_motor = 16; 
     }
 
     public static class Intake {
@@ -61,7 +61,7 @@ public final class Constants {
         } 
         
         public static final KinematicLimits uncappedLimits = new KinematicLimits();
-        public static final KinematicLimits autoLimits = new KinematicLimits(3.5, 4, Math.PI, Math.PI);  
+        public static final KinematicLimits autoLimits = new KinematicLimits(4, 4, Math.PI*2, Math.PI*2);  
         public static final KinematicLimits oneMPSLimits = new KinematicLimits(3, Math.PI); 
     }
 

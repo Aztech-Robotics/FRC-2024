@@ -5,16 +5,17 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 
 public class Shooter extends SubsystemBase { 
   private static Shooter mShooter; 
-  private final CANSparkMax top_motor, down_motor;
+  private final CANSparkMax down_motor, top_motor;
   
   private Shooter() {
-    top_motor = new CANSparkMax(0, MotorType.kBrushless); 
-    down_motor = new CANSparkMax(0, MotorType.kBrushless); 
-    top_motor.setIdleMode(IdleMode.kBrake); 
+    down_motor = new CANSparkMax(Constants.Shooter.id_down_motor, MotorType.kBrushless); 
+    top_motor = new CANSparkMax(Constants.Shooter.id_top_motor, MotorType.kBrushless); 
     down_motor.setIdleMode(IdleMode.kBrake); 
+    top_motor.setIdleMode(IdleMode.kBrake); 
   } 
 
   public static Shooter getInstance () { 

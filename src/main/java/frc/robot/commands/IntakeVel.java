@@ -10,7 +10,7 @@ public class IntakeVel extends Command {
 
   @Override
   public void initialize() {
-    mIntake.setConstantVel(0.2); 
+    mIntake.setConstantVel(-0.5); 
     mIntake.setIntakeControlState(IntakeControlState.ConstantVelocity); 
   }
 

@@ -1,20 +1,17 @@
 package frc.robot.subsystems;
 
+import java.util.Optional;
+
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.Pigeon2;
 
-import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.Nat;
-import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -22,7 +19,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.swerve.DriveMotionPlanner;
 import frc.lib.swerve.ModuleState;
 import frc.lib.swerve.SwerveDriveKinematics;
-import frc.lib.swerve.SwerveDrivePoseEstimator;
+import frc.lib.swerve.SwerveDriveOdometry;
 import frc.lib.swerve.SwerveModule;
 import frc.robot.Constants;
 import frc.robot.Constants.SwerveModules;
@@ -47,19 +44,16 @@ public class Drive extends SubsystemBase {
   }
   private DriveControlState mControlState = DriveControlState.None;
   private KinematicLimits mKinematicLimits = Constants.Drive.oneMPSLimits; 
-  private SwerveDriveKinematics swerveKinematics = new SwerveDriveKinematics(
+  private SwerveDriveKinematics mSwerveKinematics = new SwerveDriveKinematics(
     new Translation2d(Constants.Drive.wheel_base / 2.0, Constants.Drive.track_width / 2.0),
     new Translation2d(Constants.Drive.wheel_base / 2.0, -Constants.Drive.track_width / 2.0),
     new Translation2d(-Constants.Drive.wheel_base / 2.0, Constants.Drive.track_width / 2.0),
     new Translation2d(-Constants.Drive.wheel_base / 2.0, -Constants.Drive.track_width / 2.0)
   ); 
-  private SwerveDrivePoseEstimator mOdometry; 
+  private SwerveDriveOdometry mOdometry; 
   private DriveMotionPlanner mMotionPlanner; 
+  private final Vision mVision = Vision.getInstance();
   private boolean odometryReset = false; 
-  private HolonomicDriveController poseController = new HolonomicDriveController(
-    new PIDController(0, 0, 0), new PIDController(0, 0, 0), 
-    new ProfiledPIDController(0, 0, 0, new Constraints(0, 0))
-  );
   private PIDController snapController = new PIDController(3.5, 0, 0); 
   private Field2d field = new Field2d();
   public boolean isTuningMode = false; 
@@ -73,11 +67,7 @@ public class Drive extends SubsystemBase {
       new SwerveModule(SwerveModules.MOD3, 3)
     };
     mPigeon.reset(); 
-    mOdometry = new SwerveDrivePoseEstimator(
-      swerveKinematics, getModulesStates(), new Pose2d(), 
-      new Matrix<>(Nat.N3(), Nat.N1()), 
-      new Matrix<>(Nat.N3(), Nat.N1()) 
-    ); 
+    mOdometry = new SwerveDriveOdometry(mSwerveKinematics, getModulesStates()); 
     mMotionPlanner = new DriveMotionPlanner(); 
     for (SwerveModule module : mSwerveModules){
       module.outputTelemetry(); 
@@ -120,15 +110,18 @@ public class Drive extends SubsystemBase {
 
   public void readPeriodicInputs () {
     mPeriodicIO.timestamp = Timer.getFPGATimestamp(); 
-    StatusSignal<Double> yawAngle = mPigeon.getPitch(); 
+    StatusSignal<Double> yawAngle = mPigeon.getYaw(); 
     yawAngle.refresh();
     mPeriodicIO.yawAngle = Rotation2d.fromDegrees(yawAngle.getValue()); 
     for (SwerveModule module : mSwerveModules) {
       module.readPeriodicInputs();
     }
     mPeriodicIO.meas_module_states = getModulesStates(); 
-    mPeriodicIO.meas_chassis_speeds = swerveKinematics.toChassisSpeeds(mPeriodicIO.meas_module_states); 
-    mPeriodicIO.robot_pose = mOdometry.update(mPeriodicIO.yawAngle, mPeriodicIO.meas_module_states); 
+    mPeriodicIO.meas_chassis_speeds = mSwerveKinematics.toChassisSpeeds(mPeriodicIO.meas_module_states); 
+    mOdometry.update(mPeriodicIO.yawAngle, mPeriodicIO.meas_module_states); 
+    Optional<Pose2d> visionPose = mVision.getVisionPose(); 
+    if (visionPose.isPresent()) mOdometry.addVisionMeasurement(visionPose.get(), mVision.getTimestamp(mPeriodicIO.timestamp));  
+    mPeriodicIO.robot_pose =  mOdometry.getPoseMeters(); 
     field.setRobotPose(mPeriodicIO.robot_pose); 
   }
 
@@ -163,9 +156,7 @@ public class Drive extends SubsystemBase {
       }
     } else if (mControlState == DriveControlState.PathFollowing) {
       mPeriodicIO.des_chassis_speeds = mMotionPlanner.update(mPeriodicIO.robot_pose, mPeriodicIO.timestamp);
-    } else if (mControlState == DriveControlState.DriveToPose) {
-      mPeriodicIO.des_chassis_speeds = poseController.calculate(mPeriodicIO.robot_pose, null, 0, null); 
-    }
+    } 
     writePeriodicOutputs();
     if (isTuningMode) feedTuningMode(); 
   }
@@ -192,7 +183,7 @@ public class Drive extends SubsystemBase {
         wanted_speeds.vyMetersPerSecond = (wanted_speeds.vyMetersPerSecond / velocity_magnitude) * mKinematicLimits.kMaxDriveVelocity;
       }
       ModuleState[] prev_module_states = mPeriodicIO.des_module_states.clone(); // Get last setpoint to get differentials
-      ChassisSpeeds prev_chassis_speeds = swerveKinematics.toChassisSpeeds(prev_module_states); 
+      ChassisSpeeds prev_chassis_speeds = mSwerveKinematics.toChassisSpeeds(prev_module_states); 
   
       double dx = wanted_speeds.vxMetersPerSecond - prev_chassis_speeds.vxMetersPerSecond;
       double dy = wanted_speeds.vyMetersPerSecond - prev_chassis_speeds.vyMetersPerSecond;
@@ -226,11 +217,11 @@ public class Drive extends SubsystemBase {
         prev_chassis_speeds.omegaRadiansPerSecond + domega * min_omega_scalar
       );
        
-      ModuleState[] real_module_setpoints = swerveKinematics.toModuleStates(wanted_speeds);
+      ModuleState[] real_module_setpoints = mSwerveKinematics.toModuleStates(wanted_speeds);
       mPeriodicIO.des_module_states = real_module_setpoints;
 
-    } else if (mControlState == DriveControlState.PathFollowing) {
-      mPeriodicIO.des_module_states = swerveKinematics.toModuleStates(wanted_speeds); 
+    } else if (mControlState == DriveControlState.PathFollowing) { 
+      mPeriodicIO.des_module_states = mSwerveKinematics.toModuleStates(wanted_speeds); 
 
     } else if (mControlState == DriveControlState.ForceOrient) {
       mPeriodicIO.des_module_states = new ModuleState [] {
@@ -363,5 +354,7 @@ public class Drive extends SubsystemBase {
 
   private void outputTelemetry (){ 
     Telemetry.mDriverTab.add(field).withPosition(0, 0).withSize(7, 4);
+    Telemetry.mDriverTab.addDouble("Robot Pose X", () -> mPeriodicIO.robot_pose.getX()).withPosition(7, 3); 
+    Telemetry.mDriverTab.addDouble("Robot Pose Y", () -> mPeriodicIO.robot_pose.getY()).withPosition(8, 3); 
   }
 }

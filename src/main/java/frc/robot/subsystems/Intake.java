@@ -14,15 +14,15 @@ public class Intake extends SubsystemBase {
   private final CANSparkMax mIntakeMotor; 
 
   private PeriodicIO mPeriodicIO = new PeriodicIO(); 
-  public enum IntakeControlState {
-    None,
-    VariableVelocity,
-    ConstantVelocity
-  }
+  public enum IntakeControlState { 
+    None, 
+    VariableVelocity, 
+    ConstantVelocity 
+  } 
   private IntakeControlState mControlState = IntakeControlState.None; 
   private double mConstantVel = 0; 
 
-  private Intake() {
+  private Intake() { 
     mIntakeMotor = new CANSparkMax(Constants.Intake.id_intake_motor, MotorType.kBrushless); 
     mIntakeMotor.setIdleMode(IdleMode.kBrake); 
   }
@@ -34,14 +34,12 @@ public class Intake extends SubsystemBase {
 
   public static class PeriodicIO {
     //Inputs 
-    double timestamp = 0; 
     double meas_vel = 0; 
     //Outputs 
     double des_vel = 0; 
   }
 
   public void readPeriodicInputs () {
-    mPeriodicIO.timestamp = Timer.getFPGATimestamp(); 
     mPeriodicIO.meas_vel = mIntakeMotor.get(); 
   }
 

@@ -4,7 +4,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
@@ -27,24 +27,26 @@ public class ThreeClosestNotes implements IAuto {
     @Override 
     public Command getAutoCommand () {
         return new SequentialCommandGroup( 
-            new ParallelDeadlineGroup(
+            new ParallelRaceGroup(
                 new FollowPath(mSpk_Right, Rotation2d.fromDegrees(Telemetry.isRedAlliance() ? 180 : 0)),
                 new SequentialCommandGroup(
-                    new WaitCommand(1),
+                    new WaitCommand(0.5),
                     new IntakeVel()
                 )
             ),
-            new ParallelDeadlineGroup(
+            new WaitCommand(1),
+            new ParallelRaceGroup(
                 new FollowPath(mRight_Center, Rotation2d.fromDegrees(Telemetry.isRedAlliance() ? 180 : 0)),
                 new SequentialCommandGroup(
-                    new WaitCommand(1),
+                    new WaitCommand(0.5),
                     new IntakeVel()
                 )
             ), 
-            new ParallelDeadlineGroup(
+            new WaitCommand(1),
+            new ParallelRaceGroup(
                 new FollowPath(mCenter_Left, Rotation2d.fromDegrees(Telemetry.isRedAlliance() ? 180 : 0)),
                 new SequentialCommandGroup(
-                    new WaitCommand(1),
+                    new WaitCommand(0.5),
                     new IntakeVel()
                 )
             )

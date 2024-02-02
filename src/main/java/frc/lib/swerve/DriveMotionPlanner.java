@@ -51,27 +51,6 @@ public class DriveMotionPlanner {
         return desired_ChassisSpeeds; 
     }
 
-    public ChassisSpeeds update (Pose2d current_pose, double current_time, Rotation2d tagAngleOverride){
-        ChassisSpeeds desired_ChassisSpeeds = new ChassisSpeeds(); 
-        if (currentTrajectory != null){ 
-            if (startTime.isNaN()){     
-                startTime = Timer.getFPGATimestamp();
-            }
-            double seconds = current_time - startTime; 
-            Trajectory.State desired_state = null; 
-            if (seconds <= currentTrajectory.getTotalTimeSeconds()){
-                desired_state = currentTrajectory.sample(seconds);
-            } else {
-                isTrajectoryFinished = true; 
-                currentTrajectory = null; 
-            }
-            if (desired_state != null) {
-                desired_ChassisSpeeds = autoController.calculate(current_pose, desired_state, tagAngleOverride); 
-            } 
-        } 
-        return desired_ChassisSpeeds; 
-    }
-
     public boolean isTrajectoryFinished() {
         return isTrajectoryFinished;
     }

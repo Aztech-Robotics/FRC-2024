@@ -10,22 +10,22 @@ public class ControlBoard {
     public static final XboxController operator = new XboxController(1); 
 
     public static DoubleSupplier getLeftYC0 () {
-        return () -> MathUtil.applyDeadband(-driver.getLeftY(), 0.2);
+        return () -> MathUtil.applyDeadband(-driver.getLeftY(), 0.2); 
     }
 
     public static DoubleSupplier getLeftXC0 () {
-        return () -> MathUtil.applyDeadband(-driver.getLeftX(), 0.2);
+        return () -> MathUtil.applyDeadband(-driver.getLeftX(), 0.2); 
     }
 
     public static DoubleSupplier getRightXC0 () {
-        return () -> MathUtil.applyDeadband(-driver.getRightX(), 0.2);
+        return () -> MathUtil.applyDeadband(-driver.getRightX(), 0.2); 
     }
 
     public static DoubleSupplier getTriggersC0 () {
-        return () -> (driver.getRightTriggerAxis() - driver.getLeftTriggerAxis()); 
+        return () -> (-driver.getRightTriggerAxis() + driver.getLeftTriggerAxis()); 
     }
 
     public static DoubleSupplier getRightYC1 () {
-        return () -> MathUtil.applyDeadband(-operator.getRightY(), 0.2);
+        return () -> MathUtil.applyDeadband(-operator.getRightY(), 0.2); 
     }
 }
