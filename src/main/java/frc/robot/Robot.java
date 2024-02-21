@@ -14,14 +14,17 @@ import frc.robot.ModeManager.SubMode;
 import frc.robot.auto.IAuto;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Drive.DriveControlState;
 import frc.robot.subsystems.Intake.IntakeControlState;
+import frc.robot.subsystems.Shooter.ShooterControlState;
 
 public class Robot extends TimedRobot {
   private Telemetry mTelemetry; 
   private ModeManager mModeManager;
   private Drive mDrive; 
   private Intake mIntake; 
+  private Shooter mShooter; 
   private Optional<IAuto> mAutoMode = Optional.empty(); 
   private Command mAutonomousCommand; 
   private static DataLog log; 
@@ -37,6 +40,7 @@ public class Robot extends TimedRobot {
     mModeManager = ModeManager.getInstance(); 
     mDrive = Drive.getInstance(); 
     mIntake = Intake.getInstance(); 
+    mShooter = Shooter.getInstance(); 
   }
 
   @Override
@@ -47,8 +51,9 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledInit() { 
     mDrive.setDriveControlState(DriveControlState.None); 
-    if (mDrive.recordingDataLog) mDrive.recordDataLog(false); 
-    if (mDrive.isTuningMode) mDrive.setTuningMode(false);
+    mIntake.setIntakeControlState(IntakeControlState.None); 
+    mShooter.setShooterControlState(ShooterControlState.None);  
+    
   }
 
   @Override
@@ -78,25 +83,33 @@ public class Robot extends TimedRobot {
     mDrive.setKinematicsLimits(Constants.Drive.oneMPSLimits); 
     mDrive.setDriveControlState(DriveControlState.TeleopControl); 
     mIntake.setIntakeControlState(IntakeControlState.VariableVelocity); 
-    mDrive.resetOdometry(new Pose2d());
+    mShooter.setShooterControlState(ShooterControlState.VariableVelocity);
   }
 
   @Override
   public void teleopPeriodic() {
     //Driver
-    if (ControlBoard.driver.getAButtonPressed()) {
+    if (ControlBoard.driver.getRightBumperPressed()) {
       mDrive.setYawAngle(0); 
     }
     if (ControlBoard.driver.getPOV() != -1) { 
       mDrive.setHeadingControl(Rotation2d.fromDegrees(ControlBoard.driver.getPOV())); 
     }
-    if (ControlBoard.driver.getRightBumperPressed()) {
+    if (ControlBoard.driver.getAButtonPressed()) {
       mIntake.keepCurrentVel();
     }
-    if (ControlBoard.driver.getLeftBumperPressed()) {
+    if (ControlBoard.driver.getBButtonPressed()) {
       mIntake.setIntakeControlState(IntakeControlState.ConstantVelocity); 
-    } else if (ControlBoard.driver.getLeftBumperReleased()) {
+    } else if (ControlBoard.driver.getBButtonReleased()) {
       mIntake.setIntakeControlState(IntakeControlState.VariableVelocity); 
+    } 
+    if (ControlBoard.driver.getXButtonPressed()) {
+      mShooter.keepCurrentVel();
+    }
+    if (ControlBoard.driver.getYButtonPressed()) {
+      mShooter.setShooterControlState(ShooterControlState.ConstantVelocity); 
+    } else if (ControlBoard.driver.getBButtonReleased()) {
+      mShooter.setShooterControlState(ShooterControlState.VariableVelocity);  
     } 
     //Operator
     if (ControlBoard.operator.getLeftBumperPressed()) mModeManager.toggleMode(); 
@@ -117,10 +130,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testInit() { 
-    mDrive.setKinematicsLimits(Constants.Drive.oneMPSLimits); 
-    mDrive.setDriveControlState(DriveControlState.TeleopControl); 
-    mDrive.setTuningMode(true); 
-    mDrive.recordDataLog(true);
   }
 
   @Override

@@ -14,12 +14,13 @@ public final class Constants {
     }
 
     public static class Shooter {
-        public static final int id_top_motor = 15; 
-        public static final int id_down_motor = 16; 
+        public static final int id_top = 16; 
+        public static final int id_down = 17; 
     }
 
     public static class Intake {
-        public static final int id_intake_motor = 14; 
+        public static final int id_intake = 14; 
+        public static final int id_rollers = 15; 
     }
 
     public static TrajectoryConfig createTrajConfig (double maxVel, double maxAccel) {

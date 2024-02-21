@@ -4,14 +4,13 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.ControlBoard;
 
 public class Intake extends SubsystemBase {
   private static Intake mIntake;
-  private final CANSparkMax mIntakeMotor; 
+  private final CANSparkMax mIntakeMotor, mRollersMotor; 
 
   private PeriodicIO mPeriodicIO = new PeriodicIO(); 
   public enum IntakeControlState { 
@@ -23,8 +22,10 @@ public class Intake extends SubsystemBase {
   private double mConstantVel = 0; 
 
   private Intake() { 
-    mIntakeMotor = new CANSparkMax(Constants.Intake.id_intake_motor, MotorType.kBrushless); 
+    mIntakeMotor = new CANSparkMax(Constants.Intake.id_intake, MotorType.kBrushless); 
+    mRollersMotor = new CANSparkMax(Constants.Intake.id_rollers, MotorType.kBrushless); 
     mIntakeMotor.setIdleMode(IdleMode.kBrake); 
+    mRollersMotor.setIdleMode(IdleMode.kBrake); 
   }
 
   public static Intake getInstance () {
@@ -44,7 +45,8 @@ public class Intake extends SubsystemBase {
   }
 
   public void writePeriodicOutputs () {
-    mIntakeMotor.set(mPeriodicIO.des_vel);
+    mIntakeMotor.set(mPeriodicIO.des_vel); 
+    mRollersMotor.set(mPeriodicIO.des_vel);
   }
 
   @Override
@@ -53,7 +55,7 @@ public class Intake extends SubsystemBase {
     if (mControlState == IntakeControlState.None) {
       mPeriodicIO.des_vel = 0; 
     } else if (mControlState == IntakeControlState.VariableVelocity) {
-      mPeriodicIO.des_vel = ControlBoard.getTriggersC0().getAsDouble(); 
+      mPeriodicIO.des_vel = ControlBoard.driver.getRightTriggerAxis(); 
     } else if (mControlState == IntakeControlState.ConstantVelocity) {
       mPeriodicIO.des_vel = mConstantVel; 
     }

@@ -21,10 +21,6 @@ public class ControlBoard {
         return () -> MathUtil.applyDeadband(-driver.getRightX(), 0.2); 
     }
 
-    public static DoubleSupplier getTriggersC0 () {
-        return () -> (-driver.getRightTriggerAxis() + driver.getLeftTriggerAxis()); 
-    }
-
     public static DoubleSupplier getRightYC1 () {
         return () -> MathUtil.applyDeadband(-operator.getRightY(), 0.2); 
     }
