@@ -63,7 +63,7 @@ public final class Constants {
         
         public static final KinematicLimits uncappedLimits = new KinematicLimits();
         public static final KinematicLimits autoLimits = new KinematicLimits(4, 4, Math.PI*2, Math.PI*2);  
-        public static final KinematicLimits oneMPSLimits = new KinematicLimits(3, Math.PI); 
+        public static final KinematicLimits oneMPSLimits = new KinematicLimits(3.5, Math.PI); 
     }
 
     public static class SwerveModules {

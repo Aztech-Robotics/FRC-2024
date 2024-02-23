@@ -20,13 +20,31 @@
         {
           "type": "path",
           "data": {
-            "pathName": "RIGHT_CENTER"
+            "pathName": "RIGHT_SPK"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "CENTER_LEFT"
+            "pathName": "SPK_CENTER"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "CENTER_SPK"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "SPK_LEFT"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LEFT_SPK"
           }
         }
       ]

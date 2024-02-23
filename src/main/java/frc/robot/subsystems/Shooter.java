@@ -4,6 +4,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.ControlBoard;
@@ -19,11 +20,11 @@ public class Shooter extends SubsystemBase {
     ConstantVelocity 
   } 
   private ShooterControlState mControlState = ShooterControlState.None; 
-  private double mConstantVel = 0; 
+  private double mConstantVel = 0.7; 
 
   private Shooter() { 
-    mDownMotor = new CANSparkMax(Constants.Intake.id_intake, MotorType.kBrushless); 
-    mTopMotor = new CANSparkMax(Constants.Intake.id_rollers, MotorType.kBrushless); 
+    mDownMotor = new CANSparkMax(Constants.Shooter.id_down, MotorType.kBrushless); 
+    mTopMotor = new CANSparkMax(Constants.Shooter.id_top, MotorType.kBrushless); 
     mDownMotor.setIdleMode(IdleMode.kBrake); 
     mTopMotor.setIdleMode(IdleMode.kBrake); 
   }
@@ -42,6 +43,7 @@ public class Shooter extends SubsystemBase {
 
   public void readPeriodicInputs () {
     mPeriodicIO.meas_vel = mDownMotor.get(); 
+    SmartDashboard.putNumber("PowerShooter", mPeriodicIO.meas_vel); 
   }
 
   public void writePeriodicOutputs () {
@@ -55,7 +57,7 @@ public class Shooter extends SubsystemBase {
     if (mControlState == ShooterControlState.None) {
       mPeriodicIO.des_vel = 0; 
     } else if (mControlState == ShooterControlState.VariableVelocity) {
-      mPeriodicIO.des_vel = ControlBoard.driver.getLeftTriggerAxis(); 
+      mPeriodicIO.des_vel = ControlBoard.getLeftYC1().getAsDouble(); 
     } else if (mControlState == ShooterControlState.ConstantVelocity) {
       mPeriodicIO.des_vel = mConstantVel; 
     }

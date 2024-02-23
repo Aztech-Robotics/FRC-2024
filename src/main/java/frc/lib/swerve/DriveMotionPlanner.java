@@ -14,7 +14,7 @@ import frc.robot.Constants.Drive;
 public class DriveMotionPlanner {    
     private final HolonomicDriveController autoController = new HolonomicDriveController(
         new PIDController(0, 0, 0), new PIDController(0, 0, 0), 
-        new ProfiledPIDController(0, 0, 0, new Constraints(Drive.autoLimits.kMaxAngularVelocity, Drive.autoLimits.kMaxAngularAccel))
+        new ProfiledPIDController(0.0002, 0, 0, new Constraints(Drive.autoLimits.kMaxAngularVelocity, Drive.autoLimits.kMaxAngularAccel))
     );
     private Trajectory currentTrajectory; 
     private Rotation2d targetRotation; 

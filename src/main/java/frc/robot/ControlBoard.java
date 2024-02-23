@@ -24,4 +24,8 @@ public class ControlBoard {
     public static DoubleSupplier getRightYC1 () {
         return () -> MathUtil.applyDeadband(-operator.getRightY(), 0.2); 
     }
+
+    public static DoubleSupplier getLeftYC1 () {
+        return () -> MathUtil.applyDeadband(-operator.getLeftY(), 0.2); 
+    }
 }

@@ -29,7 +29,6 @@ import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
-import frc.robot.Robot;
 import frc.robot.Telemetry;
 import frc.robot.Constants.SwerveModules;
 import frc.robot.Constants.Drive.DriveControlMode;
@@ -103,11 +102,6 @@ public class SwerveModule {
         mSteerMotor.getConfigurator().apply(gral_config); 
         mDriveMotor.burnFlash();
         setNeutralMode(true); 
-
-        rotation_demand_entry = new DoubleLogEntry(Robot.getLog(), "/module_" + moduleNumber + "/rotation_demand"); 
-        current_angle_entry = new DoubleLogEntry(Robot.getLog(), "/module_" + moduleNumber + "/current_angle");  
-        drive_demand_entry = new DoubleLogEntry(Robot.getLog(), "/module_" + moduleNumber + "/drive_demand");  
-        current_velocity_entry = new DoubleLogEntry(Robot.getLog(), "/module_" + moduleNumber + "/current_velocity"); 
     }
 
     public static class PeriodicIO {

@@ -10,17 +10,16 @@ public class IntakeVel extends Command {
 
   @Override
   public void initialize() {
-    mIntake.setConstantVel(-0.5); 
-    mIntake.setIntakeControlState(IntakeControlState.ConstantVelocity); 
+    mIntake.setControlState(IntakeControlState.TakingNote);
   }
 
   @Override
   public void end(boolean interrupted) {
-    mIntake.setIntakeControlState(IntakeControlState.None);
+    mIntake.setControlState(IntakeControlState.None);
   }
 
   @Override
   public boolean isFinished() {
-    return false;
+    return mIntake.getControlState() == IntakeControlState.VariableVelocity;
   }
 }

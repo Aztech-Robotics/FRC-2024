@@ -2,10 +2,7 @@ package frc.robot;
 
 import java.util.Optional;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.util.datalog.DataLog;
-import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -27,12 +24,6 @@ public class Robot extends TimedRobot {
   private Shooter mShooter; 
   private Optional<IAuto> mAutoMode = Optional.empty(); 
   private Command mAutonomousCommand; 
-  private static DataLog log; 
-
-  public static DataLog getLog () {
-    if (log == null) log = DataLogManager.getLog(); 
-    return log; 
-  }
 
   @Override
   public void robotInit() {
@@ -51,9 +42,8 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledInit() { 
     mDrive.setDriveControlState(DriveControlState.None); 
-    mIntake.setIntakeControlState(IntakeControlState.None); 
-    mShooter.setShooterControlState(ShooterControlState.None);  
-    
+    mIntake.setControlState(IntakeControlState.None);
+    mShooter.setShooterControlState(ShooterControlState.None);
   }
 
   @Override
@@ -82,36 +72,42 @@ public class Robot extends TimedRobot {
     }
     mDrive.setKinematicsLimits(Constants.Drive.oneMPSLimits); 
     mDrive.setDriveControlState(DriveControlState.TeleopControl); 
-    mIntake.setIntakeControlState(IntakeControlState.VariableVelocity); 
     mShooter.setShooterControlState(ShooterControlState.VariableVelocity);
   }
 
   @Override
   public void teleopPeriodic() {
     //Driver
-    if (ControlBoard.driver.getRightBumperPressed()) {
+    if (ControlBoard.driver.getXButtonPressed()) {
       mDrive.setYawAngle(0); 
     }
     if (ControlBoard.driver.getPOV() != -1) { 
       mDrive.setHeadingControl(Rotation2d.fromDegrees(ControlBoard.driver.getPOV())); 
     }
-    if (ControlBoard.driver.getAButtonPressed()) {
+
+    
+    //Operator
+    //Intake
+    if (ControlBoard.operator.getXButtonPressed()) {
       mIntake.keepCurrentVel();
     }
-    if (ControlBoard.driver.getBButtonPressed()) {
-      mIntake.setIntakeControlState(IntakeControlState.ConstantVelocity); 
-    } else if (ControlBoard.driver.getBButtonReleased()) {
-      mIntake.setIntakeControlState(IntakeControlState.VariableVelocity); 
-    } 
-    if (ControlBoard.driver.getXButtonPressed()) {
+    if (ControlBoard.operator.getAButtonPressed()) {
+      mIntake.setControlState(IntakeControlState.TakingNote); 
+    } else if (ControlBoard.operator.getBButtonPressed()) {
+      mIntake.setControlState(IntakeControlState.ReleasingNote); 
+    }
+    //Shooter
+    if (ControlBoard.operator.getYButtonPressed()) {
       mShooter.keepCurrentVel();
     }
-    if (ControlBoard.driver.getYButtonPressed()) {
+    if (ControlBoard.operator.getRightBumperPressed()) {
       mShooter.setShooterControlState(ShooterControlState.ConstantVelocity); 
-    } else if (ControlBoard.driver.getBButtonReleased()) {
-      mShooter.setShooterControlState(ShooterControlState.VariableVelocity);  
-    } 
-    //Operator
+    } else if (ControlBoard.operator.getRightBumperReleased()) {
+      mShooter.setShooterControlState(ShooterControlState.VariableVelocity);
+    }
+
+
+    /*
     if (ControlBoard.operator.getLeftBumperPressed()) mModeManager.toggleMode(); 
 
     if (ControlBoard.operator.getAButtonPressed()) {
@@ -126,6 +122,7 @@ public class Robot extends TimedRobot {
     if (ControlBoard.operator.getYButtonPressed()) {
       mModeManager.setSubMode(mModeManager.getMode() == Mode.PickUp ? SubMode.Furthest_Source : SubMode.FromLeftPodium); 
     }
+    */
   }
 
   @Override
