@@ -74,15 +74,13 @@ public class Intake extends SubsystemBase {
       mPeriodicIO.des_vel = mConstantVel; 
       if (!mPeriodicIO.distance_sensor.isNaN()) {
         if (mPeriodicIO.distance_sensor <= kDistanceNoteInside) {
-          mPeriodicIO.des_vel = 0; 
           mControlState = IntakeControlState.VariableVelocity; 
         }
       } 
     } else if (mControlState == IntakeControlState.ReleasingNote) {
       mPeriodicIO.des_vel = mConstantVel; 
-        if (!mPeriodicIO.distance_sensor.isNaN()) {
+      if (!mPeriodicIO.distance_sensor.isNaN()) {
         if (mPeriodicIO.distance_sensor >= kDistanceNoteOutside) {
-          mPeriodicIO.des_vel = 0; 
           mControlState = IntakeControlState.VariableVelocity; 
         }
       } 

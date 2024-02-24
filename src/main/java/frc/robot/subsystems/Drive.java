@@ -1,7 +1,5 @@
 package frc.robot.subsystems;
 
-import java.util.Optional;
-
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.Pigeon2;
 
@@ -52,7 +50,6 @@ public class Drive extends SubsystemBase {
   ); 
   private SwerveDriveOdometry mOdometry; 
   private DriveMotionPlanner mMotionPlanner; 
-  private final Vision mVision = Vision.getInstance();
   private boolean odometryReset = false; 
   private PIDController snapController = new PIDController(3.5, 0, 0); 
   private Field2d field = new Field2d();
@@ -118,10 +115,7 @@ public class Drive extends SubsystemBase {
     }
     mPeriodicIO.meas_module_states = getModulesStates(); 
     mPeriodicIO.meas_chassis_speeds = mSwerveKinematics.toChassisSpeeds(mPeriodicIO.meas_module_states); 
-    mOdometry.update(mPeriodicIO.yawAngle, mPeriodicIO.meas_module_states); 
-    Optional<Pose2d> visionPose = mVision.getVisionPose(); 
-    if (visionPose.isPresent()) mOdometry.addVisionMeasurement(visionPose.get(), mVision.getTimestamp(mPeriodicIO.timestamp)); 
-    mPeriodicIO.robot_pose =  mOdometry.getPoseMeters(); 
+    mPeriodicIO.robot_pose = mOdometry.update(mPeriodicIO.yawAngle, mPeriodicIO.meas_module_states); 
     field.setRobotPose(mPeriodicIO.robot_pose); 
   }
 

@@ -13,9 +13,22 @@ public final class Constants {
         public static final double width = 8.21; 
     }
 
+    public enum StatusAction {
+        InProcess,
+        Done,
+        Undefined
+    }
+
     public static class Shooter {
         public static final int id_top = 16; 
         public static final int id_down = 17; 
+
+        public static final double kp = 6e-5; 
+        public static final double ki = 0; 
+        public static final double kd = 0; 
+        public static final double kFF = 0.000015; 
+
+        public static final double gear_ratio = ((30/14)*(18/36)); 
     }
 
     public static class Intake {

@@ -1,17 +1,25 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkPIDController;
+import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.ControlBoard;
+import frc.robot.Telemetry;
+import frc.robot.Constants.StatusAction;
 
 public class Shooter extends SubsystemBase {
   private static Shooter mShooter;
   private final CANSparkMax mDownMotor, mTopMotor; 
+  private final SparkPIDController mController; 
+  private final RelativeEncoder mEncoder; 
+  private StatusAction mStatus = StatusAction.Undefined; 
+  private boolean isPercentO = false; 
 
   private PeriodicIO mPeriodicIO = new PeriodicIO(); 
   public enum ShooterControlState { 
@@ -25,8 +33,17 @@ public class Shooter extends SubsystemBase {
   private Shooter() { 
     mDownMotor = new CANSparkMax(Constants.Shooter.id_down, MotorType.kBrushless); 
     mTopMotor = new CANSparkMax(Constants.Shooter.id_top, MotorType.kBrushless); 
+    mController = mDownMotor.getPIDController(); 
+    mEncoder = mDownMotor.getEncoder(); 
+    mEncoder.setVelocityConversionFactor(Constants.Shooter.gear_ratio);
+    mController.setP(Constants.Shooter.kp, 0); 
+    mController.setI(Constants.Shooter.ki, 0);
+    mController.setD(Constants.Shooter.kd, 0);
+    mController.setFF(Constants.Shooter.kFF, 0);
     mDownMotor.setIdleMode(IdleMode.kBrake); 
     mTopMotor.setIdleMode(IdleMode.kBrake); 
+    mTopMotor.follow(mDownMotor);
+    outputTelemetry();
   }
 
   public static Shooter getInstance () {
@@ -42,13 +59,11 @@ public class Shooter extends SubsystemBase {
   }
 
   public void readPeriodicInputs () {
-    mPeriodicIO.meas_vel = mDownMotor.get(); 
-    SmartDashboard.putNumber("PowerShooter", mPeriodicIO.meas_vel); 
+    mPeriodicIO.meas_vel = mEncoder.getVelocity(); 
   }
 
   public void writePeriodicOutputs () {
-    mDownMotor.set(mPeriodicIO.des_vel); 
-    mTopMotor.set(mPeriodicIO.des_vel);
+    mController.setReference(mPeriodicIO.des_vel, isPercentO ? ControlType.kDutyCycle : ControlType.kVelocity);  
   }
 
   @Override
@@ -60,12 +75,18 @@ public class Shooter extends SubsystemBase {
       mPeriodicIO.des_vel = ControlBoard.getLeftYC1().getAsDouble(); 
     } else if (mControlState == ShooterControlState.ConstantVelocity) {
       mPeriodicIO.des_vel = mConstantVel; 
+      if (Math.abs(mConstantVel - mPeriodicIO.meas_vel) >= 100) mStatus = StatusAction.Done; 
     }
     writePeriodicOutputs(); 
   } 
-
+  
   public void setShooterControlState (ShooterControlState controlState) {
     if (mControlState != controlState) mControlState = controlState; 
+    if (mControlState == ShooterControlState.ConstantVelocity && mStatus != StatusAction.InProcess) {
+      mStatus = StatusAction.InProcess;
+    } else {
+      mStatus = StatusAction.Undefined; 
+    }
   }
 
   public void keepCurrentVel () {
@@ -74,5 +95,14 @@ public class Shooter extends SubsystemBase {
 
   public void setConstantVel (double constant_vel) {
     mConstantVel = constant_vel; 
+  }
+
+  public StatusAction geStatusAction () {
+    return mStatus; 
+  }
+
+  private void outputTelemetry () {
+    Telemetry.mSwerveTab.addDouble("Velocity", () -> mPeriodicIO.meas_vel); 
+    Telemetry.mSwerveTab.addString("StatusAction", () -> mStatus.name()); 
   }
 }

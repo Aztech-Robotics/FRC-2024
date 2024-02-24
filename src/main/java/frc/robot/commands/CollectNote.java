@@ -4,18 +4,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Intake.IntakeControlState;
 
-public class IntakeVel extends Command {
+public class CollectNote extends Command {
   private final Intake mIntake = Intake.getInstance(); 
-  public IntakeVel() {}
+  public CollectNote() {}
 
   @Override
   public void initialize() {
     mIntake.setControlState(IntakeControlState.TakingNote);
-  }
-
-  @Override
-  public void end(boolean interrupted) {
-    mIntake.setControlState(IntakeControlState.None);
   }
 
   @Override
