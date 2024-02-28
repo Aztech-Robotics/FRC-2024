@@ -34,7 +34,7 @@ public class Intake extends SubsystemBase {
     mSensor = new Rev2mDistanceSensor(Port.kOnboard); 
     mIntakeMotor.setIdleMode(IdleMode.kBrake); 
     mRollerMotor.setIdleMode(IdleMode.kBrake); 
-    mIntakeMotor.setInverted(true);
+    mIntakeMotor.setInverted(false);
     mSensor.setAutomaticMode(true); 
     outputTelemetry();
   }
@@ -107,7 +107,7 @@ public class Intake extends SubsystemBase {
   }
 
   private void outputTelemetry () {
-    Telemetry.mSwerveTab.addDouble("PowerIntake", () -> mPeriodicIO.vel_intake); 
-    Telemetry.mSwerveTab.addDouble("Distance", () -> mPeriodicIO.distance_sensor); 
+    Telemetry.mSwerveTab.addDouble("PowerIntake", () -> mPeriodicIO.vel_intake).withPosition(0, 1); 
+    Telemetry.mSwerveTab.addDouble("Distance", () -> mPeriodicIO.distance_sensor).withPosition(1, 1); 
   }
 }

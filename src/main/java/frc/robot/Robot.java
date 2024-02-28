@@ -103,6 +103,9 @@ public class Robot extends TimedRobot {
     } else if (ControlBoard.operator.getRightBumperReleased()) {
       mShooter.setShooterControlState(ShooterControlState.VariableVelocity);
     }
+    if (ControlBoard.operator.getYButtonPressed()) {
+      mShootNote.schedule(); 
+    }
   }
 
   @Override

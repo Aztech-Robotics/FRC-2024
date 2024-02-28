@@ -28,7 +28,7 @@ public class Shooter extends SubsystemBase {
     ConstantVelocity 
   } 
   private ShooterControlState mControlState = ShooterControlState.None; 
-  private double mConstantVel = 0.7; 
+  private double mConstantVel = 2800; 
 
   private Shooter() { 
     mDownMotor = new CANSparkMax(Constants.Shooter.id_down, MotorType.kBrushless); 
@@ -75,7 +75,7 @@ public class Shooter extends SubsystemBase {
       mPeriodicIO.des_vel = ControlBoard.getLeftYC1().getAsDouble(); 
     } else if (mControlState == ShooterControlState.ConstantVelocity) {
       mPeriodicIO.des_vel = mConstantVel; 
-      if (Math.abs(mConstantVel - mPeriodicIO.meas_vel) >= 100) mStatus = StatusAction.Done; 
+      if (Math.abs(mConstantVel - mPeriodicIO.meas_vel) <= 100) mStatus = StatusAction.Done; 
     }
     writePeriodicOutputs(); 
   } 
@@ -83,9 +83,11 @@ public class Shooter extends SubsystemBase {
   public void setShooterControlState (ShooterControlState controlState) {
     if (mControlState != controlState) mControlState = controlState; 
     if (mControlState == ShooterControlState.ConstantVelocity && mStatus != StatusAction.InProcess) {
-      mStatus = StatusAction.InProcess;
+      mStatus = StatusAction.InProcess; 
+      isPercentO = false; 
     } else {
       mStatus = StatusAction.Undefined; 
+      isPercentO = true;
     }
   }
 
@@ -102,7 +104,7 @@ public class Shooter extends SubsystemBase {
   }
 
   private void outputTelemetry () {
-    Telemetry.mSwerveTab.addDouble("Velocity", () -> mPeriodicIO.meas_vel); 
-    Telemetry.mSwerveTab.addString("StatusAction", () -> mStatus.name()); 
+    Telemetry.mSwerveTab.addDouble("Velocity", () -> mPeriodicIO.meas_vel).withPosition(0, 2); 
+    Telemetry.mSwerveTab.addString("StatusAction", () -> mStatus.name()).withPosition(1, 2); 
   }
 }

@@ -5,13 +5,16 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants;
 import frc.robot.Telemetry;
 import frc.robot.auto.AutoTrajectoryReader;
 import frc.robot.auto.IAuto;
+import frc.robot.commands.CollectNote;
 import frc.robot.commands.FollowPath;
 import frc.robot.commands.ResetGyroRedAlliance;
+import frc.robot.commands.ShootNote;
 
 public class ThreeClosestNotes implements IAuto {
     private final Trajectory mSpk_Right, mRight_Spk, mSpk_Center, mCenter_Spk, mSpk_Left, mLeft_Spk; 
@@ -29,12 +32,12 @@ public class ThreeClosestNotes implements IAuto {
     @Override 
     public Command getAutoCommand () {
         return new SequentialCommandGroup( 
-            new FollowPath(mSpk_Right, Rotation2d.fromDegrees(Telemetry.isRedAlliance() ? 180 : 0)),
-            new FollowPath(mRight_Spk, Rotation2d.fromDegrees(Telemetry.isRedAlliance() ? 180 : 0)),
-            new FollowPath(mSpk_Center, Rotation2d.fromDegrees(Telemetry.isRedAlliance() ? 180 : 0)),
-            new FollowPath(mCenter_Spk, Rotation2d.fromDegrees(Telemetry.isRedAlliance() ? 180 : 0)),
-            new FollowPath(mSpk_Left, Rotation2d.fromDegrees(Telemetry.isRedAlliance() ? 180 : 0)),
-            new FollowPath(mLeft_Spk, Rotation2d.fromDegrees(Telemetry.isRedAlliance() ? 180 : 0)),
+            new ParallelCommandGroup(
+                new SequentialCommandGroup(
+                    new FollowPath(mSpk_Center, Rotation2d.fromDegrees(Telemetry.isRedAlliance() ? 180 : 0)),
+                    new FollowPath(mCenter_Spk, Rotation2d.fromDegrees(Telemetry.isRedAlliance() ? 180 : 0))
+                )
+            ),
             Telemetry.isRedAlliance() ? new ResetGyroRedAlliance() : new InstantCommand()
         );
     }

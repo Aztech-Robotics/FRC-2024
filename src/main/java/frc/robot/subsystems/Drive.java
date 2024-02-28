@@ -66,12 +66,12 @@ public class Drive extends SubsystemBase {
     mPigeon.reset(); 
     mOdometry = new SwerveDriveOdometry(mSwerveKinematics, getModulesStates()); 
     mMotionPlanner = new DriveMotionPlanner(); 
-    for (SwerveModule module : mSwerveModules){
-      module.outputTelemetry(); 
-    }
     snapController.enableContinuousInput(-Math.PI, Math.PI);
-    snapController.setTolerance(Rotation2d.fromDegrees(2).getRadians());
-    outputTelemetry(); 
+    snapController.setTolerance(Rotation2d.fromDegrees(2).getRadians()); 
+    for (SwerveModule swerveModule : mSwerveModules) {
+      swerveModule.outputTelemetry(); 
+    }
+    outputTelemetry();
   }
 
   public static Drive getInstance () {
@@ -347,8 +347,8 @@ public class Drive extends SubsystemBase {
   }
 
   private void outputTelemetry (){ 
-    Telemetry.mDriverTab.add(field).withPosition(0, 0).withSize(7, 4);
-    Telemetry.mDriverTab.addDouble("Robot Pose X", () -> mPeriodicIO.robot_pose.getX()).withPosition(7, 3); 
-    Telemetry.mDriverTab.addDouble("Robot Pose Y", () -> mPeriodicIO.robot_pose.getY()).withPosition(8, 3); 
+    Telemetry.mDriverTab.addDouble("Robot Pose X", () -> mPeriodicIO.robot_pose.getX()).withPosition(0, 0); 
+    Telemetry.mDriverTab.addDouble("Robot Pose Y", () -> mPeriodicIO.robot_pose.getY()).withPosition(1, 0); 
+    Telemetry.mDriverTab.addDouble("Robot Pose Theta", () -> mPeriodicIO.robot_pose.getRotation().getDegrees()).withPosition(2, 0); 
   }
 }

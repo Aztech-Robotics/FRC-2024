@@ -23,10 +23,10 @@ public final class Constants {
         public static final int id_top = 16; 
         public static final int id_down = 17; 
 
-        public static final double kp = 6e-5; 
+        public static final double kp = 2e-4; 
         public static final double ki = 0; 
-        public static final double kd = 0; 
-        public static final double kFF = 0.000015; 
+        public static final double kd = 3e-3; 
+        public static final double kFF = 0.0002; 
 
         public static final double gear_ratio = ((30/14)*(18/36)); 
     }
@@ -75,7 +75,7 @@ public final class Constants {
         } 
         
         public static final KinematicLimits uncappedLimits = new KinematicLimits();
-        public static final KinematicLimits autoLimits = new KinematicLimits(4, 4, Math.PI*2, Math.PI*2);  
+        public static final KinematicLimits autoLimits = new KinematicLimits(4, 4.2, Math.PI*2, Math.PI*2);  
         public static final KinematicLimits oneMPSLimits = new KinematicLimits(3.5, Math.PI); 
     }
 

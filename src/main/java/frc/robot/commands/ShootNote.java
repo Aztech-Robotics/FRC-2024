@@ -12,26 +12,27 @@ public class ShootNote extends Command {
   private final Intake mIntake = Intake.getInstance(); 
   private final Shooter mShooter = Shooter.getInstance(); 
   private Double mStartTime; 
-  private boolean mFlag;
+  private boolean mFlag, mNoteDropped;
   public ShootNote() {
-    addRequirements(mIntake, mShooter);
   }
 
   @Override
   public void initialize() {
     mStartTime = Double.NaN;
     mFlag = false;  
+    mNoteDropped = false; 
     mShooter.setShooterControlState(ShooterControlState.ConstantVelocity); 
   }
-
+  
   @Override
   public void execute() {
-    if (mShooter.geStatusAction() == StatusAction.Done) {
+    if (mShooter.geStatusAction() == StatusAction.Done && mIntake.getControlState() != IntakeControlState.ReleasingNote && !mNoteDropped) {
       mIntake.setControlState(IntakeControlState.ReleasingNote); 
       mStartTime = Timer.getFPGATimestamp(); 
+      mNoteDropped = true;
     }
     if (!mStartTime.isNaN()) {
-      if (Timer.getFPGATimestamp() - mStartTime >= 1) {
+      if (Timer.getFPGATimestamp() - mStartTime >= 0.6) {
         mFlag = true; 
       }
     }
