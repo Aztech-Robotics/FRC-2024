@@ -28,7 +28,7 @@ public class Shooter extends SubsystemBase {
     ConstantVelocity 
   } 
   private ShooterControlState mControlState = ShooterControlState.None; 
-  private double mConstantVel = 2800; 
+  private double mConstantVel = 0; 
 
   private Shooter() { 
     mDownMotor = new CANSparkMax(Constants.Shooter.id_down, MotorType.kBrushless); 

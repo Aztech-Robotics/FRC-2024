@@ -7,8 +7,6 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.auto.IAuto;
-import frc.robot.commands.CollectNote;
-import frc.robot.commands.ShootNote;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
@@ -23,8 +21,6 @@ public class Robot extends TimedRobot {
   private Shooter mShooter; 
   private Optional<IAuto> mAutoMode = Optional.empty(); 
   private Command mAutonomousCommand; 
-  private CollectNote mCollectNote; 
-  private ShootNote mShootNote; 
 
   @Override
   public void robotInit() {
@@ -32,8 +28,6 @@ public class Robot extends TimedRobot {
     mDrive = Drive.getInstance(); 
     mIntake = Intake.getInstance(); 
     mShooter = Shooter.getInstance(); 
-    mCollectNote = new CollectNote(); 
-    mShootNote = new ShootNote(); 
   }
 
   @Override
@@ -81,6 +75,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     //Driver
+
     if (ControlBoard.driver.getXButtonPressed()) {
       mDrive.setYawAngle(0); 
     }
@@ -89,7 +84,7 @@ public class Robot extends TimedRobot {
     }
 
     //Operator
-    //Intake 
+
     if (ControlBoard.operator.getAButtonPressed()) {
       mIntake.setControlState(IntakeControlState.TakingNote); 
     } else if (ControlBoard.operator.getBButtonPressed()) { 
@@ -97,14 +92,19 @@ public class Robot extends TimedRobot {
     } else if (ControlBoard.operator.getXButtonPressed()) {
       mIntake.setControlState(IntakeControlState.VariableVelocity);
     }
-    //Shooter
+
     if (ControlBoard.operator.getRightBumperPressed()) {
+      mShooter.setConstantVel(2800);
       mShooter.setShooterControlState(ShooterControlState.ConstantVelocity); 
     } else if (ControlBoard.operator.getRightBumperReleased()) {
       mShooter.setShooterControlState(ShooterControlState.VariableVelocity);
     }
-    if (ControlBoard.operator.getYButtonPressed()) {
-      mShootNote.schedule(); 
+
+    if (ControlBoard.operator.getLeftBumperPressed()) {
+      mShooter.setConstantVel(800);
+      mShooter.setShooterControlState(ShooterControlState.ConstantVelocity); 
+    } else if (ControlBoard.operator.getLeftBumperReleased()) {
+      mShooter.setShooterControlState(ShooterControlState.VariableVelocity);
     }
   }
 
