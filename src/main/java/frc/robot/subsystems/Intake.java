@@ -24,7 +24,7 @@ public class Intake extends SubsystemBase {
     VariableVelocity
   } 
   private IntakeControlState mControlState = IntakeControlState.None; 
-  private final double kDistanceNoteInside = 5; 
+  private final double kDistanceNoteInside = 10; 
   private final double kDistanceNoteOutside = 9; 
   private double mConstantVel = 0.5; 
 
@@ -107,7 +107,7 @@ public class Intake extends SubsystemBase {
   }
 
   private void outputTelemetry () {
-    Telemetry.mSwerveTab.addDouble("PowerIntake", () -> mPeriodicIO.vel_intake).withPosition(0, 1); 
-    Telemetry.mSwerveTab.addDouble("Distance", () -> mPeriodicIO.distance_sensor).withPosition(1, 1); 
+    Telemetry.mSwerveTab.addDouble("PowerIntake", () -> mPeriodicIO.vel_intake).withPosition(8, 2); 
+    Telemetry.mDriverTab.addDouble("Distance", () -> mPeriodicIO.distance_sensor).withPosition(7, 1); 
   }
 }

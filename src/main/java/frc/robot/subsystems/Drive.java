@@ -12,7 +12,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.swerve.DriveMotionPlanner;
 import frc.lib.swerve.ModuleState;
@@ -53,8 +52,6 @@ public class Drive extends SubsystemBase {
   private boolean odometryReset = false; 
   private PIDController snapController = new PIDController(3.5, 0, 0); 
   private Field2d field = new Field2d();
-  public boolean isTuningMode = false; 
-  public boolean recordingDataLog = false; 
 
   private Drive() {
     mSwerveModules = new SwerveModule[] {
@@ -152,7 +149,6 @@ public class Drive extends SubsystemBase {
       mPeriodicIO.des_chassis_speeds = mMotionPlanner.update(mPeriodicIO.robot_pose, mPeriodicIO.timestamp);
     } 
     writePeriodicOutputs();
-    if (isTuningMode) feedTuningMode(); 
   }
 
   private void updateSetpoint () {
@@ -308,47 +304,9 @@ public class Drive extends SubsystemBase {
     mControlState = DriveControlState.HeadingControl; 
   }
 
-  public void setTuningMode (boolean active) {
-    isTuningMode = active; 
-    for (SwerveModule module : mSwerveModules) {
-      module.setTuningMode(active); 
-    }
-  }
-
-  private void feedTuningMode () {
-    if (!SmartDashboard.containsKey("Drive Kp")) {
-      SmartDashboard.putNumber("Drive Kp", SwerveModules.drive_kP); 
-      SmartDashboard.putNumber("Drive Ki", SwerveModules.drive_kI); 
-      SmartDashboard.putNumber("Drive Kd", SwerveModules.drive_kD); 
-      SmartDashboard.putNumber("Steer Kp", SwerveModules.steer_kP); 
-      SmartDashboard.putNumber("Steer Ki", SwerveModules.steer_kI); 
-      SmartDashboard.putNumber("Steer Kd", SwerveModules.steer_kD); 
-    }
-
-    double drive_kp = SmartDashboard.getNumber("Drive Kp", SwerveModules.drive_kP); 
-    double drive_ki = SmartDashboard.getNumber("Drive Ki", SwerveModules.drive_kI); 
-    double drive_kd = SmartDashboard.getNumber("Drive Kd", SwerveModules.drive_kD); 
-    double steer_kp = SmartDashboard.getNumber("Steer Kp", SwerveModules.steer_kP); 
-    double steer_ki = SmartDashboard.getNumber("Steer Ki", SwerveModules.steer_kI); 
-    double steer_kd = SmartDashboard.getNumber("Steer Kd", SwerveModules.steer_kD); 
-
-    if (SwerveModules.drive_kP != drive_kp) SwerveModules.drive_kP = drive_kp; 
-    if (SwerveModules.drive_kI != drive_ki) SwerveModules.drive_kI = drive_ki; 
-    if (SwerveModules.drive_kD != drive_kd) SwerveModules.drive_kD = drive_kd; 
-    if (SwerveModules.steer_kP != steer_kp) SwerveModules.steer_kP = steer_kp; 
-    if (SwerveModules.steer_kI != steer_ki) SwerveModules.steer_kI = steer_ki; 
-    if (SwerveModules.steer_kD != steer_kd) SwerveModules.steer_kD = steer_kd; 
-  }
-
-  public void recordDataLog (boolean active) {
-    for (SwerveModule swerveModule : mSwerveModules) { 
-      swerveModule.recordDataLog(active); 
-    }
-  }
-
   private void outputTelemetry (){ 
-    Telemetry.mDriverTab.addDouble("Robot Pose X", () -> mPeriodicIO.robot_pose.getX()).withPosition(0, 0); 
-    Telemetry.mDriverTab.addDouble("Robot Pose Y", () -> mPeriodicIO.robot_pose.getY()).withPosition(1, 0); 
-    Telemetry.mDriverTab.addDouble("Robot Pose Theta", () -> mPeriodicIO.robot_pose.getRotation().getDegrees()).withPosition(2, 0); 
+    Telemetry.mSwerveTab.addDouble("Robot Pose X", () -> mPeriodicIO.robot_pose.getX()).withPosition(8, 0); 
+    Telemetry.mSwerveTab.addDouble("Robot Pose Y", () -> mPeriodicIO.robot_pose.getY()).withPosition(9, 0); 
+    Telemetry.mSwerveTab.addDouble("Robot Pose Theta", () -> mPeriodicIO.robot_pose.getRotation().getDegrees()).withPosition(8, 1); 
   }
 }

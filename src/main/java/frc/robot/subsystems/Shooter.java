@@ -104,7 +104,7 @@ public class Shooter extends SubsystemBase {
   }
 
   private void outputTelemetry () {
-    Telemetry.mSwerveTab.addDouble("Velocity", () -> mPeriodicIO.meas_vel).withPosition(0, 2); 
-    Telemetry.mSwerveTab.addString("StatusAction", () -> mStatus.name()).withPosition(1, 2); 
+    Telemetry.mSwerveTab.addDouble("Velocity", () -> mPeriodicIO.meas_vel).withPosition(8, 3); 
+    Telemetry.mDriverTab.addString("StatusAction", () -> mStatus.name()).withPosition(8, 1); 
   }
 }

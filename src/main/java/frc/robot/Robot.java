@@ -2,14 +2,17 @@ package frc.robot;
 
 import java.util.Optional;
 
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.auto.IAuto;
+import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.Climber.ClimberControlState;
 import frc.robot.subsystems.Drive.DriveControlState;
 import frc.robot.subsystems.Intake.IntakeControlState;
 import frc.robot.subsystems.Shooter.ShooterControlState;
@@ -19,6 +22,7 @@ public class Robot extends TimedRobot {
   private Drive mDrive; 
   private Intake mIntake; 
   private Shooter mShooter; 
+  private Climber mClimber; 
   private Optional<IAuto> mAutoMode = Optional.empty(); 
   private Command mAutonomousCommand; 
 
@@ -28,6 +32,8 @@ public class Robot extends TimedRobot {
     mDrive = Drive.getInstance(); 
     mIntake = Intake.getInstance(); 
     mShooter = Shooter.getInstance(); 
+    mClimber = Climber.getInstance(); 
+    CameraServer.startAutomaticCapture("camera", 0); 
   }
 
   @Override
@@ -39,7 +45,8 @@ public class Robot extends TimedRobot {
   public void disabledInit() { 
     mDrive.setDriveControlState(DriveControlState.None); 
     mIntake.setControlState(IntakeControlState.None);
-    mShooter.setShooterControlState(ShooterControlState.None);
+    mShooter.setShooterControlState(ShooterControlState.None); 
+    mClimber.setControlState(ClimberControlState.None);
   }
 
   @Override
@@ -69,7 +76,8 @@ public class Robot extends TimedRobot {
     mDrive.setKinematicsLimits(Constants.Drive.oneMPSLimits); 
     mDrive.setDriveControlState(DriveControlState.TeleopControl); 
     mIntake.setControlState(IntakeControlState.VariableVelocity);
-    mShooter.setShooterControlState(ShooterControlState.VariableVelocity);
+    mShooter.setShooterControlState(ShooterControlState.VariableVelocity); 
+    mClimber.setControlState(ClimberControlState.PercentOutput);
   }
 
   @Override
@@ -101,7 +109,7 @@ public class Robot extends TimedRobot {
     }
 
     if (ControlBoard.operator.getLeftBumperPressed()) {
-      mShooter.setConstantVel(800);
+      mShooter.setConstantVel(1000);
       mShooter.setShooterControlState(ShooterControlState.ConstantVelocity); 
     } else if (ControlBoard.operator.getLeftBumperReleased()) {
       mShooter.setShooterControlState(ShooterControlState.VariableVelocity);

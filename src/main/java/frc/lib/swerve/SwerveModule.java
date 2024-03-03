@@ -23,14 +23,11 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import frc.robot.Telemetry;
-import frc.robot.Constants.SwerveModules;
 import frc.robot.Constants.Drive.DriveControlMode;
 
 public class SwerveModule {
@@ -44,13 +41,6 @@ public class SwerveModule {
 
     private PeriodicIO mPeriodicIO = new PeriodicIO(); 
     private ModuleState targetModuleState; 
-
-    private DoubleLogEntry rotation_demand_entry;
-    private DoubleLogEntry current_angle_entry;
-    private DoubleLogEntry drive_demand_entry;
-    private DoubleLogEntry current_velocity_entry; 
-    private boolean logActive = false; 
-    private boolean tuningActive = false; 
 
     public SwerveModule (SwerveModuleConstants moduleConstants, int moduleNumber){ 
         this.moduleNumber = moduleNumber; 
@@ -160,8 +150,6 @@ public class SwerveModule {
             mPeriodicIO.driveDemand = targetVelocity;
             drivePIDController.setReference(mPeriodicIO.driveDemand, ControlType.kDutyCycle, 0, 0);
         }
-        if (logActive) writeIOtoLog(); 
-        if (tuningActive) feedTunning();
     }
 
     public void resetModule (){
@@ -191,42 +179,6 @@ public class SwerveModule {
 
     public void setDriveControlMode (DriveControlMode mode){
         mPeriodicIO.controlMode = DriveControlMode.PercentOutput; 
-    }
-
-    public void recordDataLog (boolean active) {
-        logActive = active;
-    }
-
-    private void writeIOtoLog () {
-        rotation_demand_entry.append(mPeriodicIO.rotationDemand); 
-        current_angle_entry.append(mPeriodicIO.currentAngle); 
-        drive_demand_entry.append(mPeriodicIO.driveDemand); 
-        current_velocity_entry.append(mPeriodicIO.velocity); 
-    }
-
-    public void setTuningMode (boolean active) {
-        tuningActive = active; 
-    }
-
-    private void feedFFGains () {
-        if (!SmartDashboard.containsKey("M" + moduleNumber + " Drive kFF")) SmartDashboard.putNumber("M" + moduleNumber + " Drive kFF", SwerveModules.drive_kFF); 
-        double kFF = SmartDashboard.getNumber("M" + moduleNumber + " Drive kFF", SwerveModules.drive_kFF);
-        if (SwerveModules.drive_kFF != kFF) SwerveModules.drive_kFF = kFF; 
-        if (!SmartDashboard.containsKey("M" + moduleNumber + " Steer kS")) SmartDashboard.putNumber("M" + moduleNumber + " Steer kS", SwerveModules.steer_kS); 
-        double kS = SmartDashboard.getNumber("M" + moduleNumber + " Steer kS", SwerveModules.steer_kS);
-        if (SwerveModules.steer_kS != kS) SwerveModules.steer_kS = kS;  
-    }
-
-    private void feedTunning () {
-        feedFFGains(); 
-        if (drivePIDController.getP(0) != SwerveModules.drive_kP) drivePIDController.setP(SwerveModules.drive_kP, 0); 
-        if (drivePIDController.getI(0) != SwerveModules.drive_kI) drivePIDController.setI(SwerveModules.drive_kI, 0); 
-        if (drivePIDController.getD(0) != SwerveModules.drive_kD) drivePIDController.setD(SwerveModules.drive_kD, 0); 
-        if (drivePIDController.getFF(0) != SwerveModules.drive_kFF) drivePIDController.setFF(SwerveModules.drive_kFF, 0); 
-        Slot0Configs slot0Configs = new Slot0Configs();
-        mSteerMotor.getConfigurator().refresh(
-            slot0Configs.withKP(SwerveModules.steer_kP).withKI(SwerveModules.steer_kI).withKD(SwerveModules.steer_kD) 
-        );
     }
 
     public void outputTelemetry (){

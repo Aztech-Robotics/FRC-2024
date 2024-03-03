@@ -21,6 +21,7 @@ public class ShootNote extends Command {
     mStartTime = Double.NaN;
     mFlag = false;  
     mNoteDropped = false; 
+    mShooter.setConstantVel(2800); 
     mShooter.setShooterControlState(ShooterControlState.ConstantVelocity); 
   }
   
