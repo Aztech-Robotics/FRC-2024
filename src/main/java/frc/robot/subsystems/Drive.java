@@ -11,7 +11,6 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.swerve.DriveMotionPlanner;
 import frc.lib.swerve.ModuleState;
@@ -28,7 +27,7 @@ import frc.robot.Constants.Drive.KinematicLimits;
 public class Drive extends SubsystemBase {
   private static Drive mDrive;
   private SwerveModule[] mSwerveModules;
-  private Pigeon2 mPigeon = new Pigeon2(Constants.Drive.id_pigeon); 
+  private Pigeon2 mPigeon = new Pigeon2(Constants.Drive.id_pigeon, "canivore"); 
 
   private PeriodicIO mPeriodicIO = new PeriodicIO(); 
   public enum DriveControlState {
@@ -51,7 +50,6 @@ public class Drive extends SubsystemBase {
   private DriveMotionPlanner mMotionPlanner; 
   private boolean odometryReset = false; 
   private PIDController snapController = new PIDController(3.5, 0, 0); 
-  private Field2d field = new Field2d();
 
   private Drive() {
     mSwerveModules = new SwerveModule[] {
@@ -113,7 +111,6 @@ public class Drive extends SubsystemBase {
     mPeriodicIO.meas_module_states = getModulesStates(); 
     mPeriodicIO.meas_chassis_speeds = mSwerveKinematics.toChassisSpeeds(mPeriodicIO.meas_module_states); 
     mPeriodicIO.robot_pose = mOdometry.update(mPeriodicIO.yawAngle, mPeriodicIO.meas_module_states); 
-    field.setRobotPose(mPeriodicIO.robot_pose); 
   }
 
   public void writePeriodicOutputs () {

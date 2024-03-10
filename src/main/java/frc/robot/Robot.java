@@ -84,7 +84,7 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     //Driver
 
-    if (ControlBoard.driver.getXButtonPressed()) {
+    if (ControlBoard.driver.getYButtonPressed()) {
       mDrive.setYawAngle(0); 
     }
     if (ControlBoard.driver.getPOV() != -1) { 
@@ -92,12 +92,11 @@ public class Robot extends TimedRobot {
     }
 
     //Operator
-
-    if (ControlBoard.operator.getAButtonPressed()) {
+    if (ControlBoard.driver.getAButtonPressed()) {
       mIntake.setControlState(IntakeControlState.TakingNote); 
     } else if (ControlBoard.operator.getBButtonPressed()) { 
       mIntake.setControlState(IntakeControlState.ReleasingNote); 
-    } else if (ControlBoard.operator.getXButtonPressed()) {
+    } else if (ControlBoard.driver.getXButtonPressed() || ControlBoard.operator.getXButtonPressed()) {
       mIntake.setControlState(IntakeControlState.VariableVelocity);
     }
 

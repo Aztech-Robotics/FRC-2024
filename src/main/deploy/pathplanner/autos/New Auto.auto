@@ -14,18 +14,6 @@
         {
           "type": "path",
           "data": {
-            "pathName": "SPK_RIGHT"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "RIGHT_SPK"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
             "pathName": "SPK_CENTER"
           }
         },

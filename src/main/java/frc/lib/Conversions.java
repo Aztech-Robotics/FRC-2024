@@ -12,4 +12,10 @@ public class Conversions {
     public static double unsignedToSignedDeg (double angle) {
         return mod((angle + 180), 360) - 180; 
     }
+
+    public static double MPSToRPS(double velocity, double circumference, double gearRatio) {
+        double wheelRPS = ((velocity) / circumference);
+        double falconRPS = wheelRPS * gearRatio;
+        return falconRPS;
+    }
 }

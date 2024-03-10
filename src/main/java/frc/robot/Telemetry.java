@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import frc.robot.auto.IAuto;
 import frc.robot.auto.modes.TestPath;
-import frc.robot.auto.modes.ThreeClosestNotes;
+import frc.robot.auto.modes.TwoClosestNotes;
 
 public class Telemetry {
     public static ShuffleboardTab mSwerveTab = Shuffleboard.getTab("Swerve"); 
@@ -17,7 +17,7 @@ public class Telemetry {
     public enum AutoMode {
         DO_NOTHING,
         TEST_PATH, 
-        THREE_CLOSEST_NOTES
+        TWO_CLOSEST_NOTES
     }
     private SendableChooser<Alliance> mAllianceChooser = new SendableChooser<>(); 
     private static boolean isRedAlliance = false; 
@@ -30,7 +30,7 @@ public class Telemetry {
         mAllianceChooser.addOption("RED", Alliance.Red);
         mDriverTab.add("ALLIANCE", mAllianceChooser).withPosition(7, 0); 
         mAutoChooser.setDefaultOption("DO NOTHING", AutoMode.DO_NOTHING);
-        mAutoChooser.addOption("THREE CLOSEST NOTES", AutoMode.THREE_CLOSEST_NOTES); 
+        mAutoChooser.addOption("THREE CLOSEST NOTES", AutoMode.TWO_CLOSEST_NOTES); 
         mAutoChooser.addOption("TEST PATH", AutoMode.TEST_PATH); 
         mDriverTab.add("AUTO MODE", mAutoChooser).withPosition(8, 0).withSize(2, 1); 
     }
@@ -48,7 +48,7 @@ public class Telemetry {
         }
         if (mCachedDesiredMode != desiredAutoMode || alliance_changed) {
             mAutoMode = getAutoMode(desiredAutoMode); 
-            DriverStation.reportWarning("Regenerando Auto " + desiredAutoMode.name(), alliance_changed);
+            DriverStation.reportWarning("Regenerando Auto " + desiredAutoMode.name(), true);
         }
         mCachedDesiredMode = desiredAutoMode; 
     }
@@ -59,8 +59,8 @@ public class Telemetry {
                 return Optional.empty();
             case TEST_PATH: 
                 return Optional.of(new TestPath()); 
-            case THREE_CLOSEST_NOTES: 
-                return Optional.of(new ThreeClosestNotes()); 
+            case TWO_CLOSEST_NOTES: 
+                return Optional.of(new TwoClosestNotes()); 
             default: 
                 return Optional.empty(); 
         }

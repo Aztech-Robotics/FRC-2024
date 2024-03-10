@@ -1,23 +1,28 @@
 package frc.robot.subsystems;
 
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkPIDController;
-import com.revrobotics.CANSparkBase.ControlType;
-import com.revrobotics.CANSparkBase.IdleMode;
-import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.ControlBoard;
 import frc.robot.Telemetry;
 import frc.robot.Constants.StatusAction;
+import frc.robot.subsystems.LEDS.LEDSControlState;
 
 public class Shooter extends SubsystemBase {
   private static Shooter mShooter;
-  private final CANSparkMax mDownMotor, mTopMotor; 
-  private final SparkPIDController mController; 
-  private final RelativeEncoder mEncoder; 
+  private final TalonFX mDownMotor, mTopMotor; 
   private StatusAction mStatus = StatusAction.Undefined; 
   private boolean isPercentO = false; 
 
@@ -30,19 +35,18 @@ public class Shooter extends SubsystemBase {
   private ShooterControlState mControlState = ShooterControlState.None; 
   private double mConstantVel = 0; 
 
+  private LEDS mLEDS = LEDS.getInstance(); 
+
   private Shooter() { 
-    mDownMotor = new CANSparkMax(Constants.Shooter.id_down, MotorType.kBrushless); 
-    mTopMotor = new CANSparkMax(Constants.Shooter.id_top, MotorType.kBrushless); 
-    mController = mDownMotor.getPIDController(); 
-    mEncoder = mDownMotor.getEncoder(); 
-    mEncoder.setVelocityConversionFactor(Constants.Shooter.gear_ratio);
-    mController.setP(Constants.Shooter.kp, 0); 
-    mController.setI(Constants.Shooter.ki, 0);
-    mController.setD(Constants.Shooter.kd, 0);
-    mController.setFF(Constants.Shooter.kFF, 0);
-    mDownMotor.setIdleMode(IdleMode.kBrake); 
-    mTopMotor.setIdleMode(IdleMode.kBrake); 
-    mTopMotor.follow(mDownMotor);
+    mDownMotor = new TalonFX(Constants.Shooter.id_down); 
+    mTopMotor = new TalonFX(Constants.Shooter.id_top); 
+    TalonFXConfiguration gral_config = new TalonFXConfiguration(); 
+    gral_config.CurrentLimits = new CurrentLimitsConfigs().withSupplyCurrentLimit(30).withSupplyCurrentThreshold(40).withSupplyTimeThreshold(0.1).withSupplyCurrentLimitEnable(true); 
+    gral_config.Feedback = new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor); 
+    gral_config.Slot0 = new Slot0Configs().withKP(Constants.Shooter.kp).withKI(Constants.Shooter.ki).withKD(Constants.Shooter.kd).withKS(Constants.Shooter.ks); 
+    gral_config.MotorOutput = new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake); 
+    mDownMotor.getConfigurator().apply(gral_config); 
+    mTopMotor.getConfigurator().apply(gral_config);
     outputTelemetry();
   }
 
@@ -59,11 +63,14 @@ public class Shooter extends SubsystemBase {
   }
 
   public void readPeriodicInputs () {
-    mPeriodicIO.meas_vel = mEncoder.getVelocity(); 
+    StatusSignal<Double> velocity = mDownMotor.getVelocity(); 
+    velocity.refresh(); 
+    mPeriodicIO.meas_vel = velocity.getValue(); 
   }
 
-  public void writePeriodicOutputs () {
-    mController.setReference(mPeriodicIO.des_vel, isPercentO ? ControlType.kDutyCycle : ControlType.kVelocity);  
+  public void writePeriodicOutputs () { 
+    mDownMotor.setControl(isPercentO ? new DutyCycleOut(mPeriodicIO.des_vel) : new VelocityDutyCycle(mPeriodicIO.des_vel)); 
+    mTopMotor.setControl(new Follower(mDownMotor.getDeviceID(), false)); 
   }
 
   @Override
@@ -75,7 +82,10 @@ public class Shooter extends SubsystemBase {
       mPeriodicIO.des_vel = ControlBoard.getLeftYC1().getAsDouble(); 
     } else if (mControlState == ShooterControlState.ConstantVelocity) {
       mPeriodicIO.des_vel = mConstantVel; 
-      if (Math.abs(mConstantVel - mPeriodicIO.meas_vel) <= 100) mStatus = StatusAction.Done; 
+      if (Math.abs(mConstantVel - mPeriodicIO.meas_vel) <= 100) {
+        mStatus = StatusAction.Done; 
+        mLEDS.setState(LEDSControlState.SolidGreen);
+      } 
     }
     writePeriodicOutputs(); 
   } 

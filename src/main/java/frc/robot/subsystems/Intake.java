@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.ControlBoard;
 import frc.robot.Telemetry;
+import frc.robot.subsystems.LEDS.LEDSControlState;
 
 public class Intake extends SubsystemBase {
   private static Intake mIntake;
@@ -27,6 +28,8 @@ public class Intake extends SubsystemBase {
   private final double kDistanceNoteInside = 10; 
   private final double kDistanceNoteOutside = 9; 
   private double mConstantVel = 0.5; 
+
+  private final LEDS mLEDS = LEDS.getInstance(); 
 
   private Intake() { 
     mIntakeMotor = new CANSparkMax(Constants.Intake.id_intake, MotorType.kBrushless); 
@@ -75,6 +78,7 @@ public class Intake extends SubsystemBase {
       if (!mPeriodicIO.distance_sensor.isNaN()) {
         if (mPeriodicIO.distance_sensor <= kDistanceNoteInside) {
           mControlState = IntakeControlState.VariableVelocity; 
+          mLEDS.setState(LEDSControlState.BlinkGreen);
         }
       } 
     } else if (mControlState == IntakeControlState.ReleasingNote) {
@@ -82,10 +86,11 @@ public class Intake extends SubsystemBase {
       if (!mPeriodicIO.distance_sensor.isNaN()) {
         if (mPeriodicIO.distance_sensor >= kDistanceNoteOutside) {
           mControlState = IntakeControlState.VariableVelocity; 
+          mLEDS.setState(LEDSControlState.SolidAlliance); 
         }
       } 
     } else if (mControlState == IntakeControlState.VariableVelocity) {
-      mPeriodicIO.des_vel = ControlBoard.getRightYC1().getAsDouble(); 
+      mPeriodicIO.des_vel = ControlBoard.driver.getRightTriggerAxis() - ControlBoard.driver.getLeftTriggerAxis(); 
     }
     writePeriodicOutputs(); 
   } 

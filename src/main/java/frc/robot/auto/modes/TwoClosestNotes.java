@@ -14,21 +14,16 @@ import frc.robot.auto.IAuto;
 import frc.robot.commands.CollectNote;
 import frc.robot.commands.FollowPath;
 import frc.robot.commands.ResetGyroRedAlliance;
-import frc.robot.commands.ShootNote;
 
-public class ThreeClosestNotes implements IAuto {
+public class TwoClosestNotes implements IAuto {
     private final Trajectory mSpk_Center, mCenter_Spk; 
     private final Pose2d mStartingPose; 
-    public ThreeClosestNotes () {
-        mSpk_Center = AutoTrajectoryReader.generateTrajectoryFromFile("paths/Spk_Center.path", Constants.createTrajConfig(3, 4));
-        mCenter_Spk = AutoTrajectoryReader.generateTrajectoryFromFile("paths/Center_Spk.path", Constants.createTrajConfig(3, 4));
+    private final Command mAutoCommand; 
+    public TwoClosestNotes () {
+        mSpk_Center = AutoTrajectoryReader.generateTrajectoryFromFile("paths/Spk_Center.path", Constants.createTrajConfig(3, 2));
+        mCenter_Spk = AutoTrajectoryReader.generateTrajectoryFromFile("paths/Center_Spk.path", Constants.createTrajConfig(3, 2));
         mStartingPose = new Pose2d(mSpk_Center.getInitialPose().getTranslation(), Rotation2d.fromDegrees(Telemetry.isRedAlliance() ? 180 : 0)); 
-    }
-
-    @Override 
-    public Command getAutoCommand () {
-        return new SequentialCommandGroup( 
-            new ShootNote(), 
+        mAutoCommand = new SequentialCommandGroup(
             new ParallelCommandGroup(
                 new SequentialCommandGroup(
                     new FollowPath(mSpk_Center, Rotation2d.fromDegrees(Telemetry.isRedAlliance() ? 180 : 0)),
@@ -36,9 +31,13 @@ public class ThreeClosestNotes implements IAuto {
                 ),
                 new CollectNote()
             ),
-            new ShootNote(), 
             Telemetry.isRedAlliance() ? new ResetGyroRedAlliance() : new InstantCommand()
         );
+    }
+
+    @Override 
+    public Command getAutoCommand () {
+        return mAutoCommand; 
     }
     @Override
     public Pose2d getStartingPose () {
