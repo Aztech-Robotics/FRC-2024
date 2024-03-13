@@ -1,18 +1,22 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.controls.MotionMagicVelocityDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.ControlBoard;
@@ -23,6 +27,7 @@ import frc.robot.subsystems.LEDS.LEDSControlState;
 public class Shooter extends SubsystemBase {
   private static Shooter mShooter;
   private final TalonFX mDownMotor, mTopMotor; 
+  private final Servo mRightServo, mLeftServo; 
   private StatusAction mStatus = StatusAction.Undefined; 
   private boolean isPercentO = false; 
 
@@ -34,17 +39,21 @@ public class Shooter extends SubsystemBase {
   } 
   private ShooterControlState mControlState = ShooterControlState.None; 
   private double mConstantVel = 0; 
+  private double mAngleServo = 0.8; 
 
   private LEDS mLEDS = LEDS.getInstance(); 
 
   private Shooter() { 
     mDownMotor = new TalonFX(Constants.Shooter.id_down); 
     mTopMotor = new TalonFX(Constants.Shooter.id_top); 
+    mRightServo = new Servo(4); 
+    mLeftServo = new Servo(3); 
     TalonFXConfiguration gral_config = new TalonFXConfiguration(); 
     gral_config.CurrentLimits = new CurrentLimitsConfigs().withSupplyCurrentLimit(30).withSupplyCurrentThreshold(40).withSupplyTimeThreshold(0.1).withSupplyCurrentLimitEnable(true); 
     gral_config.Feedback = new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor); 
     gral_config.Slot0 = new Slot0Configs().withKP(Constants.Shooter.kp).withKI(Constants.Shooter.ki).withKD(Constants.Shooter.kd).withKS(Constants.Shooter.ks); 
-    gral_config.MotorOutput = new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake); 
+    gral_config.MotorOutput = new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Coast).withInverted(InvertedValue.Clockwise_Positive); 
+    gral_config.MotionMagic = new MotionMagicConfigs().withMotionMagicAcceleration(50).withMotionMagicJerk(25); 
     mDownMotor.getConfigurator().apply(gral_config); 
     mTopMotor.getConfigurator().apply(gral_config);
     outputTelemetry();
@@ -58,19 +67,25 @@ public class Shooter extends SubsystemBase {
   public static class PeriodicIO {
     //Inputs 
     double meas_vel = 0; 
+    double meas_error = 0; 
     //Outputs 
     double des_vel = 0; 
+    double pos_servo = 0; 
   }
 
   public void readPeriodicInputs () {
-    StatusSignal<Double> velocity = mDownMotor.getVelocity(); 
-    velocity.refresh(); 
+    StatusSignal<Double> velocity = mTopMotor.getVelocity(); 
+    StatusSignal<Double> error_vel = mTopMotor.getClosedLoopError(); 
+    BaseStatusSignal.refreshAll(velocity, error_vel);
     mPeriodicIO.meas_vel = velocity.getValue(); 
+    mPeriodicIO.meas_error = error_vel.getValue(); 
   }
 
   public void writePeriodicOutputs () { 
-    mDownMotor.setControl(isPercentO ? new DutyCycleOut(mPeriodicIO.des_vel) : new VelocityDutyCycle(mPeriodicIO.des_vel)); 
-    mTopMotor.setControl(new Follower(mDownMotor.getDeviceID(), false)); 
+    mTopMotor.setControl(isPercentO ? new DutyCycleOut(mPeriodicIO.des_vel) : new MotionMagicVelocityDutyCycle(mPeriodicIO.des_vel, 50, false, 0.6, 0, false, false, false)); 
+    mDownMotor.setControl(new Follower(mTopMotor.getDeviceID(), false)); 
+    mRightServo.set(mPeriodicIO.pos_servo);
+    mLeftServo.set(1 - mPeriodicIO.pos_servo); 
   }
 
   @Override
@@ -82,11 +97,11 @@ public class Shooter extends SubsystemBase {
       mPeriodicIO.des_vel = ControlBoard.getLeftYC1().getAsDouble(); 
     } else if (mControlState == ShooterControlState.ConstantVelocity) {
       mPeriodicIO.des_vel = mConstantVel; 
-      if (Math.abs(mConstantVel - mPeriodicIO.meas_vel) <= 100) {
+      if (Math.abs(mConstantVel - mPeriodicIO.meas_vel) <= 5) {
         mStatus = StatusAction.Done; 
-        mLEDS.setState(LEDSControlState.SolidGreen);
       } 
     }
+    mPeriodicIO.pos_servo = mAngleServo; 
     writePeriodicOutputs(); 
   } 
   
@@ -111,6 +126,10 @@ public class Shooter extends SubsystemBase {
 
   public StatusAction geStatusAction () {
     return mStatus; 
+  }
+
+  public void setServoPos (double position) {
+    mAngleServo = position; 
   }
 
   private void outputTelemetry () {

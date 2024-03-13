@@ -17,8 +17,8 @@ import frc.robot.Telemetry;
 public class Climber extends SubsystemBase {
   private static Climber mClimber; 
   private final CANSparkMax mRightTel, mLeftTel; 
-  private final RelativeEncoder mEncoder; 
-  private final SparkPIDController mController; 
+  private final RelativeEncoder mRightEncoder, mLeftEncoder; 
+  private final SparkPIDController mRightController, mLeftController; 
   private final SparkLimitSwitch mRightRevLim, mLeftRevLim; 
   private PeriodicIO mPeriodicIO = new PeriodicIO(); 
   public enum ClimberControlState {
@@ -34,17 +34,26 @@ public class Climber extends SubsystemBase {
     mRightTel.setIdleMode(IdleMode.kBrake); 
     mLeftTel = new CANSparkMax(Constants.Climber.id_left_tel, MotorType.kBrushless); 
     mLeftTel.setIdleMode(IdleMode.kBrake); 
-    mEncoder = mRightTel.getEncoder(); 
-    mEncoder.setPositionConversionFactor(1/3); 
-    mController = mRightTel.getPIDController(); 
-    mController.setP(0); 
-    mController.setI(0); 
-    mController.setD(0);  
-    mController.setFF(0); 
-    mRightRevLim = mRightTel.getReverseLimitSwitch(Type.kNormallyClosed); 
-    mRightRevLim.enableLimitSwitch(false); 
-    mLeftRevLim = mLeftTel.getReverseLimitSwitch(Type.kNormallyClosed); 
-    mLeftRevLim.enableLimitSwitch(false); 
+    mRightEncoder = mRightTel.getEncoder(); 
+    mRightEncoder.setPositionConversionFactor(1/3); 
+    mLeftEncoder = mLeftTel.getEncoder(); 
+    mLeftEncoder.setPositionConversionFactor(1/3); 
+    mRightController = mRightTel.getPIDController(); 
+    mRightController.setP(Constants.Climber.kp); 
+    mRightController.setI(Constants.Climber.ki); 
+    mRightController.setD(Constants.Climber.kd);  
+    mRightController.setFF(Constants.Climber.kFF); 
+    mLeftController = mLeftTel.getPIDController(); 
+    mLeftController.setP(Constants.Climber.kp); 
+    mLeftController.setI(Constants.Climber.ki); 
+    mLeftController.setD(Constants.Climber.kd);  
+    mLeftController.setFF(Constants.Climber.kFF); 
+    mRightRevLim = mRightTel.getReverseLimitSwitch(Type.kNormallyOpen); 
+    mRightRevLim.enableLimitSwitch(true); 
+    mLeftRevLim = mLeftTel.getReverseLimitSwitch(Type.kNormallyOpen); 
+    mLeftRevLim.enableLimitSwitch(true); 
+    mRightEncoder.setPosition(0); 
+    mLeftEncoder.setPosition(0); 
     outputTelemetry();
   }
 
@@ -64,19 +73,19 @@ public class Climber extends SubsystemBase {
   }
 
   public void readPeriodicInputs () {
-    mPeriodicIO.right_limit = mRightRevLim.isPressed(); 
-    mPeriodicIO.left_limit = mLeftRevLim.isPressed(); 
-    if (mPeriodicIO.right_limit) mEncoder.setPosition(0); 
-    mPeriodicIO.meas_pos = mEncoder.getPosition(); 
+    if (mRightRevLim.isPressed()) mRightEncoder.setPosition(0); 
+    if (mLeftRevLim.isPressed()) mLeftEncoder.setPosition(0); 
+    mPeriodicIO.meas_pos = mRightEncoder.getPosition(); 
 
   }
   
   public void writePeriodicOutputs () {
     if (mControlState == ClimberControlState.PositionOutput) {
-      mController.setReference(mPeriodicIO.des_pos, ControlType.kPosition); 
+      mRightController.setReference(mPeriodicIO.des_pos, ControlType.kPosition); 
+      mLeftController.setReference(mPeriodicIO.des_pos, ControlType.kPosition); 
     } else {
-      mController.setReference(mPeriodicIO.des_vel, ControlType.kDutyCycle); 
-      mLeftTel.follow(mRightTel); 
+      mRightController.setReference(mPeriodicIO.des_vel, ControlType.kDutyCycle); 
+      mLeftController.setReference(mPeriodicIO.des_vel, ControlType.kDutyCycle); 
     }
   }
 
@@ -100,6 +109,10 @@ public class Climber extends SubsystemBase {
   public ClimberControlState getControlState () {
     return mControlState; 
   } 
+
+  public void setTargetPosition (double targetPos) {
+    mTargetPosition = targetPos; 
+  }
 
   private void outputTelemetry () {
     Telemetry.mDriverTab.addDouble("PosTelRight", () -> mPeriodicIO.meas_pos).withPosition(8, 2); 

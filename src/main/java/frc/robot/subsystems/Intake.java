@@ -25,7 +25,7 @@ public class Intake extends SubsystemBase {
     VariableVelocity
   } 
   private IntakeControlState mControlState = IntakeControlState.None; 
-  private final double kDistanceNoteInside = 10; 
+  private final double kDistanceNoteInside = 8; 
   private final double kDistanceNoteOutside = 9; 
   private double mConstantVel = 0.5; 
 
@@ -65,7 +65,7 @@ public class Intake extends SubsystemBase {
 
   public void writePeriodicOutputs () {
     mIntakeMotor.set(mPeriodicIO.des_vel); 
-    mRollerMotor.set(mPeriodicIO.des_vel);
+    mRollerMotor.set(mPeriodicIO.des_vel*0.8);
   }
 
   @Override

@@ -21,8 +21,8 @@ public class LEDS extends SubsystemBase {
   }
 
   private LEDS() {
-    mRio0 = new DigitalOutput(0); 
-    mRio1 = new DigitalOutput(1); 
+    mRio0 = new DigitalOutput(2); 
+    mRio1 = new DigitalOutput(3); 
   }
 
   public static class PeriodicIO {

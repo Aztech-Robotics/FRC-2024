@@ -22,16 +22,21 @@ public final class Constants {
     public static class Climber {
         public static final int id_right_tel = 18; 
         public static final int id_left_tel = 19; 
+
+        public static final double kp = 0.1; 
+        public static final double ki = 0; 
+        public static final double kd = 0; 
+        public static final double kFF = 0; 
     }
 
     public static class Shooter {
         public static final int id_top = 16; 
         public static final int id_down = 17; 
 
-        public static final double kp = 2e-4; 
+        public static final double kp = 0.025; 
         public static final double ki = 0; 
-        public static final double kd = 3e-3; 
-        public static final double ks = 0.0002; 
+        public static final double kd = 0; 
+        public static final double ks = 0; 
 
         public static final double gear_ratio = ((30/14)*(18/36)); 
     }
@@ -90,9 +95,9 @@ public final class Constants {
         public static final double wheelCircumference = Math.PI * Units.inchesToMeters(4);
 
         public static final SwerveModuleConstants MOD0 = new SwerveModuleConstants(1, 2, 3, 0.094482421875);
-        public static final SwerveModuleConstants MOD1 = new SwerveModuleConstants(4, 5, 6, -0.383544921875);
+        public static final SwerveModuleConstants MOD1 = new SwerveModuleConstants(4, 5, 6, 0.123779296875);
         public static final SwerveModuleConstants MOD2 = new SwerveModuleConstants(7, 8, 9, 0.2392578125); 
-        public static final SwerveModuleConstants MOD3 = new SwerveModuleConstants(10, 11, 12, 0.498291015625); 
+        public static final SwerveModuleConstants MOD3 = new SwerveModuleConstants(10, 11, 12, -0.002197265625); 
 
         public static double steer_kP = 2;
         public static double steer_kI = 0; 
