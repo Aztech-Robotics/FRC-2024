@@ -38,12 +38,13 @@ public final class Constants {
         public static final double kd = 0; 
         public static final double ks = 0; 
 
-        public static final double gear_ratio = ((30/14)*(18/36)); 
     }
 
     public static class Intake {
         public static final int id_intake = 14; 
         public static final int id_rollers = 15; 
+
+        public static final double ratio_intake_roller = 5/(32/14); 
     }
 
     public static TrajectoryConfig createTrajConfig (double maxVel, double maxAccel) {

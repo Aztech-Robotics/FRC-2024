@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.ControlBoard;
 import frc.robot.Telemetry;
-import frc.robot.subsystems.LEDS.LEDSControlState;
 
 public class Intake extends SubsystemBase {
   private static Intake mIntake;
@@ -25,16 +24,18 @@ public class Intake extends SubsystemBase {
     VariableVelocity
   } 
   private IntakeControlState mControlState = IntakeControlState.None; 
-  private final double kDistanceNoteInside = 8; 
-  private final double kDistanceNoteOutside = 9; 
-  private double mConstantVel = 0.5; 
-
-  private final LEDS mLEDS = LEDS.getInstance(); 
+  private final double kDistanceNoteInside = 10; 
+  private final double kDistanceNoteOutside = 12; 
+  private double mConstantVel = 0.35; 
 
   private Intake() { 
     mIntakeMotor = new CANSparkMax(Constants.Intake.id_intake, MotorType.kBrushless); 
     mRollerMotor = new CANSparkMax(Constants.Intake.id_rollers, MotorType.kBrushless);
     mSensor = new Rev2mDistanceSensor(Port.kOnboard); 
+    mIntakeMotor.enableVoltageCompensation(12); 
+    mRollerMotor.enableVoltageCompensation(12); 
+    mIntakeMotor.setSmartCurrentLimit(30); 
+    mRollerMotor.setSmartCurrentLimit(30); 
     mIntakeMotor.setIdleMode(IdleMode.kBrake); 
     mRollerMotor.setIdleMode(IdleMode.kBrake); 
     mIntakeMotor.setInverted(false);
@@ -49,48 +50,49 @@ public class Intake extends SubsystemBase {
 
   public static class PeriodicIO {
     //Inputs 
-    double timestamp = 0; 
-    double vel_intake = 0; 
-    double vel_roller = 0; 
     Double distance_sensor = 0.0; 
+    double vel_roller = 0; 
     //Outputs 
-    double des_vel = 0; 
+    double des_vel_intake = 0; 
+    double des_vel_roller = 0; 
   }
 
   public void readPeriodicInputs () {
-    mPeriodicIO.vel_intake = mIntakeMotor.get(); 
     mPeriodicIO.vel_roller = mRollerMotor.get();
     mPeriodicIO.distance_sensor = mSensor.isRangeValid() ? mSensor.GetRange() : Double.NaN; 
   }
 
   public void writePeriodicOutputs () {
-    mIntakeMotor.set(mPeriodicIO.des_vel); 
-    mRollerMotor.set(mPeriodicIO.des_vel*0.8);
+    mIntakeMotor.set(mPeriodicIO.des_vel_intake); 
+    mRollerMotor.set(mPeriodicIO.des_vel_roller);
   }
 
   @Override
   public void periodic() {
     readPeriodicInputs();
     if (mControlState == IntakeControlState.None) {
-      mPeriodicIO.des_vel = 0; 
+      mPeriodicIO.des_vel_intake = 0; 
+      mPeriodicIO.des_vel_roller = 0; 
     } else if (mControlState == IntakeControlState.TakingNote) {
-      mPeriodicIO.des_vel = mConstantVel; 
+      mPeriodicIO.des_vel_intake = mConstantVel * Constants.Intake.ratio_intake_roller;
+      mPeriodicIO.des_vel_roller = mConstantVel; 
       if (!mPeriodicIO.distance_sensor.isNaN()) {
         if (mPeriodicIO.distance_sensor <= kDistanceNoteInside) {
           mControlState = IntakeControlState.VariableVelocity; 
-          mLEDS.setState(LEDSControlState.BlinkGreen);
         }
       } 
     } else if (mControlState == IntakeControlState.ReleasingNote) {
-      mPeriodicIO.des_vel = mConstantVel; 
+      mPeriodicIO.des_vel_intake = 0;
+      mPeriodicIO.des_vel_roller = mConstantVel; 
       if (!mPeriodicIO.distance_sensor.isNaN()) {
         if (mPeriodicIO.distance_sensor >= kDistanceNoteOutside) {
           mControlState = IntakeControlState.VariableVelocity; 
-          mLEDS.setState(LEDSControlState.SolidAlliance); 
         }
       } 
     } else if (mControlState == IntakeControlState.VariableVelocity) {
-      mPeriodicIO.des_vel = ControlBoard.driver.getRightTriggerAxis() - ControlBoard.driver.getLeftTriggerAxis(); 
+      double output_control = ControlBoard.driver.getRightTriggerAxis() - ControlBoard.driver.getLeftTriggerAxis(); 
+      mPeriodicIO.des_vel_intake = output_control * Constants.Intake.ratio_intake_roller; 
+      mPeriodicIO.des_vel_roller = output_control;    
     }
     writePeriodicOutputs(); 
   } 
@@ -103,16 +105,12 @@ public class Intake extends SubsystemBase {
     return mControlState; 
   }
 
-  public void keepCurrentVel () {
-    mConstantVel = mPeriodicIO.vel_intake; 
-  }
-
   public void setConstantVel (double constant_vel) {
     mConstantVel = constant_vel; 
   }
 
   private void outputTelemetry () {
-    Telemetry.mSwerveTab.addDouble("PowerIntake", () -> mPeriodicIO.vel_intake).withPosition(8, 2); 
+    Telemetry.mSwerveTab.addDouble("PowerIntake", () -> mPeriodicIO.vel_roller).withPosition(8, 2); 
     Telemetry.mDriverTab.addDouble("Distance", () -> mPeriodicIO.distance_sensor).withPosition(7, 1); 
   }
 }

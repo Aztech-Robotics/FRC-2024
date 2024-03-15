@@ -22,7 +22,6 @@ import frc.robot.Constants;
 import frc.robot.ControlBoard;
 import frc.robot.Telemetry;
 import frc.robot.Constants.StatusAction;
-import frc.robot.subsystems.LEDS.LEDSControlState;
 
 public class Shooter extends SubsystemBase {
   private static Shooter mShooter;
@@ -41,8 +40,6 @@ public class Shooter extends SubsystemBase {
   private double mConstantVel = 0; 
   private double mAngleServo = 0.8; 
 
-  private LEDS mLEDS = LEDS.getInstance(); 
-
   private Shooter() { 
     mDownMotor = new TalonFX(Constants.Shooter.id_down); 
     mTopMotor = new TalonFX(Constants.Shooter.id_top); 
@@ -53,7 +50,7 @@ public class Shooter extends SubsystemBase {
     gral_config.Feedback = new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor); 
     gral_config.Slot0 = new Slot0Configs().withKP(Constants.Shooter.kp).withKI(Constants.Shooter.ki).withKD(Constants.Shooter.kd).withKS(Constants.Shooter.ks); 
     gral_config.MotorOutput = new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Coast).withInverted(InvertedValue.Clockwise_Positive); 
-    gral_config.MotionMagic = new MotionMagicConfigs().withMotionMagicAcceleration(50).withMotionMagicJerk(25); 
+    gral_config.MotionMagic = new MotionMagicConfigs().withMotionMagicAcceleration(50).withMotionMagicJerk(0); 
     mDownMotor.getConfigurator().apply(gral_config); 
     mTopMotor.getConfigurator().apply(gral_config);
     outputTelemetry();
@@ -67,7 +64,6 @@ public class Shooter extends SubsystemBase {
   public static class PeriodicIO {
     //Inputs 
     double meas_vel = 0; 
-    double meas_error = 0; 
     //Outputs 
     double des_vel = 0; 
     double pos_servo = 0; 
@@ -75,10 +71,8 @@ public class Shooter extends SubsystemBase {
 
   public void readPeriodicInputs () {
     StatusSignal<Double> velocity = mTopMotor.getVelocity(); 
-    StatusSignal<Double> error_vel = mTopMotor.getClosedLoopError(); 
-    BaseStatusSignal.refreshAll(velocity, error_vel);
+    BaseStatusSignal.refreshAll(velocity);
     mPeriodicIO.meas_vel = velocity.getValue(); 
-    mPeriodicIO.meas_error = error_vel.getValue(); 
   }
 
   public void writePeriodicOutputs () { 
