@@ -41,8 +41,8 @@ public class Shooter extends SubsystemBase {
   private double mAngleServo = 0.8; 
 
   private Shooter() { 
-    mDownMotor = new TalonFX(Constants.Shooter.id_down); 
-    mTopMotor = new TalonFX(Constants.Shooter.id_top); 
+    mDownMotor = new TalonFX(Constants.Shooter.id_down, "canivore"); 
+    mTopMotor = new TalonFX(Constants.Shooter.id_top, "canivore"); 
     mRightServo = new Servo(4); 
     mLeftServo = new Servo(3); 
     TalonFXConfiguration gral_config = new TalonFXConfiguration(); 
@@ -50,7 +50,7 @@ public class Shooter extends SubsystemBase {
     gral_config.Feedback = new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor); 
     gral_config.Slot0 = new Slot0Configs().withKP(Constants.Shooter.kp).withKI(Constants.Shooter.ki).withKD(Constants.Shooter.kd).withKS(Constants.Shooter.ks); 
     gral_config.MotorOutput = new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Coast).withInverted(InvertedValue.Clockwise_Positive); 
-    gral_config.MotionMagic = new MotionMagicConfigs().withMotionMagicAcceleration(50).withMotionMagicJerk(0); 
+    gral_config.MotionMagic = new MotionMagicConfigs().withMotionMagicAcceleration(70).withMotionMagicJerk(0); 
     mDownMotor.getConfigurator().apply(gral_config); 
     mTopMotor.getConfigurator().apply(gral_config);
     outputTelemetry();
@@ -97,6 +97,7 @@ public class Shooter extends SubsystemBase {
     }
     mPeriodicIO.pos_servo = mAngleServo; 
     writePeriodicOutputs(); 
+
   } 
   
   public void setShooterControlState (ShooterControlState controlState) {

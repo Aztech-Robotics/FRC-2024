@@ -87,7 +87,7 @@ public final class Constants {
         
         public static final KinematicLimits uncappedLimits = new KinematicLimits();
         public static final KinematicLimits autoLimits = new KinematicLimits(4, 4.2, Math.PI*2, Math.PI*2);  
-        public static final KinematicLimits oneMPSLimits = new KinematicLimits(4.5, 2*Math.PI); 
+        public static final KinematicLimits oneMPSLimits = new KinematicLimits(4.5, 3*Math.PI); 
     }
 
     public static class SwerveModules {
@@ -105,7 +105,7 @@ public final class Constants {
         public static double steer_kD = 0;
         public static double steer_kS = 0; 
         
-        public static double drive_kP = 0.00019; 
+        public static double drive_kP = 0.00023; 
         public static double drive_kI = 0; 
         public static double drive_kD = 0; 
         public static double drive_kS = 0;

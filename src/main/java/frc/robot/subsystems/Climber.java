@@ -95,7 +95,7 @@ public class Climber extends SubsystemBase {
     if (mControlState == ClimberControlState.None) {
       mPeriodicIO.des_vel = 0; 
     } else if (mControlState == ClimberControlState.PercentOutput) {
-      mPeriodicIO.des_vel = ControlBoard.operator.getRightTriggerAxis() - ControlBoard.operator.getLeftTriggerAxis();
+      mPeriodicIO.des_vel = ControlBoard.driver.getRightTriggerAxis() - ControlBoard.driver.getLeftTriggerAxis();
     } else if (mControlState == ClimberControlState.PositionOutput) {
       mPeriodicIO.des_pos = mTargetPosition; 
     }

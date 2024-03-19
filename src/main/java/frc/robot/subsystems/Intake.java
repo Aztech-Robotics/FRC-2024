@@ -24,7 +24,7 @@ public class Intake extends SubsystemBase {
     VariableVelocity
   } 
   private IntakeControlState mControlState = IntakeControlState.None; 
-  private final double kDistanceNoteInside = 10; 
+  private final double kDistanceNoteInside = 14; 
   private final double kDistanceNoteOutside = 12; 
   private double mConstantVel = 0.35; 
 
@@ -34,8 +34,8 @@ public class Intake extends SubsystemBase {
     mSensor = new Rev2mDistanceSensor(Port.kOnboard); 
     mIntakeMotor.enableVoltageCompensation(12); 
     mRollerMotor.enableVoltageCompensation(12); 
-    mIntakeMotor.setSmartCurrentLimit(30); 
-    mRollerMotor.setSmartCurrentLimit(30); 
+    mIntakeMotor.setSmartCurrentLimit(50); 
+    mRollerMotor.setSmartCurrentLimit(50); 
     mIntakeMotor.setIdleMode(IdleMode.kBrake); 
     mRollerMotor.setIdleMode(IdleMode.kBrake); 
     mIntakeMotor.setInverted(false);
@@ -77,7 +77,7 @@ public class Intake extends SubsystemBase {
       mPeriodicIO.des_vel_intake = mConstantVel * Constants.Intake.ratio_intake_roller;
       mPeriodicIO.des_vel_roller = mConstantVel; 
       if (!mPeriodicIO.distance_sensor.isNaN()) {
-        if (mPeriodicIO.distance_sensor <= kDistanceNoteInside) {
+        if (mPeriodicIO.distance_sensor < kDistanceNoteInside) {
           mControlState = IntakeControlState.VariableVelocity; 
         }
       } 
@@ -90,7 +90,7 @@ public class Intake extends SubsystemBase {
         }
       } 
     } else if (mControlState == IntakeControlState.VariableVelocity) {
-      double output_control = ControlBoard.driver.getRightTriggerAxis() - ControlBoard.driver.getLeftTriggerAxis(); 
+      double output_control = ControlBoard.operator.getRightTriggerAxis() - ControlBoard.operator.getLeftTriggerAxis(); 
       mPeriodicIO.des_vel_intake = output_control * Constants.Intake.ratio_intake_roller; 
       mPeriodicIO.des_vel_roller = output_control;    
     }

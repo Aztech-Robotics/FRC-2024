@@ -82,7 +82,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    if (ControlBoard.driver.getYButtonPressed()) {
+    if (ControlBoard.driver.getXButtonPressed()) {
       mDrive.setYawAngle(0); 
     }
     if (ControlBoard.driver.getPOV() != -1) { 
@@ -90,11 +90,11 @@ public class Robot extends TimedRobot {
     } 
 
     //Operator
-    if (ControlBoard.driver.getAButtonPressed()) {
+    if (ControlBoard.operator.getAButtonPressed()) {
       mIntake.setControlState(IntakeControlState.TakingNote); 
     } else if (ControlBoard.operator.getBButtonPressed()) { 
       mIntake.setControlState(IntakeControlState.ReleasingNote); 
-    } else if (ControlBoard.driver.getXButtonPressed() || ControlBoard.operator.getXButtonPressed()) {
+    } else if (ControlBoard.operator.getXButtonPressed()) {
       mIntake.setControlState(IntakeControlState.VariableVelocity);
     }
 
@@ -106,7 +106,7 @@ public class Robot extends TimedRobot {
     }
 
     if (ControlBoard.operator.getLeftBumperPressed()) {
-      mShooter.setConstantVel(8);
+      mShooter.setConstantVel(30);
       mShooter.setShooterControlState(ShooterControlState.ConstantVelocity); 
       mShooter.setServoPos(0.3);
     } else if (ControlBoard.operator.getLeftBumperReleased()) {
@@ -114,10 +114,10 @@ public class Robot extends TimedRobot {
       mShooter.setServoPos(0.8); 
     }
 
-    if (ControlBoard.operator.getYButtonPressed()) {
+    if (ControlBoard.driver.getYButtonPressed()) {
       mClimber.setTargetPosition(70); 
       mClimber.setControlState(ClimberControlState.PositionOutput); 
-    } else if (ControlBoard.operator.getAButtonPressed()) {
+    } else if (ControlBoard.driver.getAButtonPressed()) {
       mClimber.setTargetPosition(-5); 
       mClimber.setControlState(ClimberControlState.PositionOutput);
     }
