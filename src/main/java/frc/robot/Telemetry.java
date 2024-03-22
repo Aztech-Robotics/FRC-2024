@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import frc.robot.auto.IAuto;
-import frc.robot.auto.modes.Note_OutLine_Right;
+import frc.robot.auto.modes.SideNote;
 import frc.robot.auto.modes.TestPath;
 import frc.robot.auto.modes.TwoClosestNotes;
 
@@ -19,7 +19,7 @@ public class Telemetry {
         DO_NOTHING,
         TEST_PATH, 
         TWO_NOTES,
-        NOTE_OUTLINE_RIGHT
+        SIDE_NOTE
     }
     private SendableChooser<Alliance> mAllianceChooser = new SendableChooser<>(); 
     private static boolean isRedAlliance = false; 
@@ -33,7 +33,7 @@ public class Telemetry {
         mDriverTab.add("ALLIANCE", mAllianceChooser).withPosition(7, 0); 
         mAutoChooser.setDefaultOption("DO NOTHING", AutoMode.DO_NOTHING);
         mAutoChooser.addOption("TWO NOTES", AutoMode.TWO_NOTES); 
-        mAutoChooser.addOption("ONE NOTE + OUTLINE RIGHT", AutoMode.NOTE_OUTLINE_RIGHT);
+        mAutoChooser.addOption("SIDE NOTE", AutoMode.SIDE_NOTE);
         mAutoChooser.addOption("TEST PATH", AutoMode.TEST_PATH); 
         mDriverTab.add("AUTO MODE", mAutoChooser).withPosition(8, 0).withSize(2, 1); 
     }
@@ -64,8 +64,8 @@ public class Telemetry {
                 return Optional.of(new TestPath()); 
             case TWO_NOTES: 
                 return Optional.of(new TwoClosestNotes()); 
-            case NOTE_OUTLINE_RIGHT: 
-                return Optional.of(new Note_OutLine_Right()); 
+            case SIDE_NOTE: 
+                return Optional.of(new SideNote()); 
             default: 
                 return Optional.empty(); 
         }

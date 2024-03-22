@@ -34,8 +34,8 @@ public class Intake extends SubsystemBase {
     mSensor = new Rev2mDistanceSensor(Port.kOnboard); 
     mIntakeMotor.enableVoltageCompensation(12); 
     mRollerMotor.enableVoltageCompensation(12); 
-    mIntakeMotor.setSmartCurrentLimit(50); 
-    mRollerMotor.setSmartCurrentLimit(50); 
+    mIntakeMotor.setSmartCurrentLimit(80); 
+    mRollerMotor.setSmartCurrentLimit(80); 
     mIntakeMotor.setIdleMode(IdleMode.kBrake); 
     mRollerMotor.setIdleMode(IdleMode.kBrake); 
     mIntakeMotor.setInverted(false);

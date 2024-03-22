@@ -106,12 +106,10 @@ public class Robot extends TimedRobot {
     }
 
     if (ControlBoard.operator.getLeftBumperPressed()) {
-      mShooter.setConstantVel(30);
+      mShooter.setConstantVel(10);
       mShooter.setShooterControlState(ShooterControlState.ConstantVelocity); 
-      mShooter.setServoPos(0.3);
     } else if (ControlBoard.operator.getLeftBumperReleased()) {
       mShooter.setShooterControlState(ShooterControlState.VariableVelocity); 
-      mShooter.setServoPos(0.8); 
     }
 
     if (ControlBoard.driver.getYButtonPressed()) {

@@ -47,7 +47,7 @@ public class SwerveModule {
         closedLoopConfigs.ContinuousWrap = true; 
         TalonFXConfiguration steer_config = new TalonFXConfiguration();
         steer_config.ClosedLoopGeneral = closedLoopConfigs;
-        steer_config.CurrentLimits = new CurrentLimitsConfigs().withSupplyCurrentLimit(40).withSupplyCurrentThreshold(50).withSupplyTimeThreshold(0.1).withSupplyCurrentLimitEnable(true);
+        steer_config.CurrentLimits = new CurrentLimitsConfigs().withSupplyCurrentLimit(45).withSupplyCurrentThreshold(50).withSupplyTimeThreshold(0.1).withSupplyCurrentLimitEnable(true);
         steer_config.Feedback = new FeedbackConfigs().withFeedbackRemoteSensorID(mCANcoder.getDeviceID()).withFeedbackSensorSource(FeedbackSensorSourceValue.FusedCANcoder).withRotorToSensorRatio(SwerveModules.steering_gear_ratio);
         steer_config.Slot0 = new Slot0Configs().withKP(SwerveModules.steer_kP).withKI(SwerveModules.steer_kI).withKD(SwerveModules.steer_kD).withKS(SwerveModules.steer_kS); 
         mSteerMotor.getConfigurator().apply(steer_config); 
